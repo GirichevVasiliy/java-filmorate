@@ -16,11 +16,9 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User newUser) {
-        if (!users.containsValue(newUser)) {
+        if (!users.containsValue(newUser) && userValidation(newUser)) {
             users.put(newUser.getEmail(), newUser);
             return newUser;
-        } else {
-
         }
         return null;
     }
