@@ -151,6 +151,30 @@ class UserControllerTest {
                         "Пользователи не одинаковые")
         );
     }
+    @Test
+    @DisplayName("Тест создания пользователя и валидации пользователя с отсутствующим именем пользователя null")
+    void createUserAndValidationNameIsNullTest() {
+        final int idUser1 = 1;
+        User user1 = User.builder()
+                .email("girichev@yandex.ru")
+                .login("VasiliyGir")
+                .name(null)
+                .birthday(LocalDate.parse("1987-02-26"))
+                .build();
+        userController.createUser(user1);
+        User userControl = User.builder()
+                .id(idUser1)
+                .email("girichev@yandex.ru")
+                .login("VasiliyGir")
+                .name("VasiliyGir")
+                .birthday(LocalDate.parse("1987-02-26"))
+                .build();
+        assertAll(
+                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                        "Пользователи не одинаковые")
+        );
+    }
 
     @Test
     @DisplayName("Тест создания пользователя и валидации пользователя из будущего")

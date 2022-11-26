@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @RequestMapping("/users")
 @RestController
@@ -80,6 +81,9 @@ public class UserController {
             } else if (user.getLogin().contains(" ")) {
                 log.warn("Валидация логина пользователя завершена ошибкой");
                 throw new ValidationException("Логин не может содержать пробелы.");
+            }
+            if (Objects.isNull(user.getName())) {
+                user.setName(user.getLogin());
             }
             if (user.getName().isBlank()) {
                 user.setName(user.getLogin());
