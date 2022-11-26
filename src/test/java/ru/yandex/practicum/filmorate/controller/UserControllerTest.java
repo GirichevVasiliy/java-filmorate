@@ -7,15 +7,44 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
     private UserController userController;
+    private User user0;
+    private User user1;
+    private User user2;
 
     @BeforeEach
     void init() {
         userController = new UserController();
+    }
+
+    void initUsers() {
+        user0 = User.builder()
+                .email("petrov@yandex.ru")
+                .login("Petr")
+                .name("Stanislav Petrov")
+                .birthday(LocalDate.parse("1961-05-21"))
+                .build();
+        userController.createUser(user0);
+        user1 = User.builder()
+                .email("girichev@yandex.ru")
+                .login("VasiliyGir")
+                .name("Vasiliy Girichev")
+                .birthday(LocalDate.parse("1987-02-26"))
+                .build();
+        userController.createUser(user1);
+        user2 = User.builder()
+                .email("ivanov@yandex.ru")
+                .login("VladIvanov")
+                .name("Vlad Ivanov")
+                .birthday(LocalDate.parse("1989-01-01"))
+                .build();
+        userController.createUser(user2);
     }
 
     @Test
@@ -80,6 +109,7 @@ class UserControllerTest {
                     "Тест с неверным адресом электронной почты провален");
         }
     }
+
     @Test
     @DisplayName("Tест создания пользователя и валидации пользователя с пробелом в логине")
     void createUserAndValidationSpaceInUserLoginTest() {
@@ -141,11 +171,61 @@ class UserControllerTest {
 
 
     @Test
-    void updateUser() {
+    @DisplayName("Обновление пользователей")
+    void updateUserStandardTest() {
+        final int idUser0 = 1;
+        final int idUser1 = 2;
+        final int idUser2 = 3;
+        initUsers();
+        final User user1Control = User.builder()
+                .id(idUser1)
+                .email("girichev2022@yandex.ru")
+                .login("VasiliyGir87")
+                .name("Vasilii Girichev")
+                .birthday(LocalDate.parse("1987-02-27"))
+                .build();
+        userController.updateUser(user1Control);
+        final User user2Control = User.builder()
+                .id(idUser2)
+                .email("ivanov@yandex.ru")
+                .login("VladIvanov")
+                .name("Vlad Ivanov")
+                .birthday(LocalDate.parse("1989-01-01"))
+                .build();
+        userController.updateUser(user2Control);
+        assertAll(
+                () -> assertTrue(userController.getUsers().containsValue(user1Control), "" +
+                        "Пользователь не сохранен"),
+                () -> assertEquals(user1Control, userController.getUsers().get(user1Control.getId()),
+                        "Пользователи не одинаковые")
+        );
+        assertAll(
+                () -> assertTrue(userController.getUsers().containsValue(user2Control), "" +
+                        "Пользователь не сохранен"),
+                () -> assertEquals(user2Control, userController.getUsers().get(user2Control.getId()),
+                        "Пользователи не одинаковые")
+        );
+        assertAll(
+                () -> assertTrue(userController.getUsers().containsValue(user0), "" +
+                        "Пользователь не сохранен"),
+                        () -> assertEquals(idUser0, user0.getId(), "id не совпал"),
+                        () -> assertEquals(user0.getEmail(), "petrov@yandex.ru", "Почта пользователя не совпала"),
+                        () -> assertEquals(user0.getLogin(), "Petr", "Логин пользователя не совпал"),
+                        () -> assertEquals(user0.getName(), "Stanislav Petrov", "Имя пользователя не совпало"),
+                        () -> assertEquals(user0.getBirthday(), LocalDate.parse("1961-05-21"),
+                                "Дата рождения пользователя не совпала")
+        );
     }
 
     @Test
+    @DisplayName("Получение списка всех пользователей пользователей")
     void findAllUsers() {
+        initUsers();
+        List<User> listOfAllUsers = new ArrayList<>(userController.findAllUsers());
+        assertAll(
+                () -> assertTrue(listOfAllUsers.contains(user0), "Пользователь id = 0 не найден"),
+                () -> assertTrue(listOfAllUsers.contains(user1),"Пользователь id = 1 не найден"),
+                () -> assertTrue(listOfAllUsers.contains(user2), "Пользователь id = 2 не найден")
+        );
     }
-
 }
