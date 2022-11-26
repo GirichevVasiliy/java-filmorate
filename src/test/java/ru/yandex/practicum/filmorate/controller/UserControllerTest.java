@@ -244,9 +244,12 @@ class UserControllerTest {
     @Test
     @DisplayName("Получение списка всех пользователей пользователей")
     void findAllUsers() {
+        final int size = 3;
         initUsers();
         List<User> listOfAllUsers = new ArrayList<>(userController.findAllUsers());
         assertAll(
+                () -> assertTrue(listOfAllUsers.size() == size, "Размер списка всех пользователей больше, " +
+                        "тест провален"),
                 () -> assertTrue(listOfAllUsers.contains(user0), "Пользователь id = 0 не найден"),
                 () -> assertTrue(listOfAllUsers.contains(user1),"Пользователь id = 1 не найден"),
                 () -> assertTrue(listOfAllUsers.contains(user2), "Пользователь id = 2 не найден")
