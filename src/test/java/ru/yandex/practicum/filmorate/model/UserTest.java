@@ -32,7 +32,6 @@ class UserTest {
     @Test
     @DisplayName("Проверка создание объекта без почты")
     void createUserEmailNull() {
-        final int idUser1 = 0;
         try{
             User user = User.builder()
                     .email(null)

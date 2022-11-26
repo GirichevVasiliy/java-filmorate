@@ -7,17 +7,14 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RequestMapping("/users")
 @RestController
 @Slf4j
 public class UserController {
     @Getter
-    private final Map<Integer, User> users = new LinkedHashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
     private int id;
 
     @PostMapping
@@ -59,7 +56,7 @@ public class UserController {
             }
             return user;
         } else {
-            throw new ValidationException("Пользователь не создан");
+            throw new ValidationException("Пользователь не обновлен");
         }
     }
 
@@ -111,23 +108,16 @@ public class UserController {
     }
 
     private boolean userVerification(User user) {
-        boolean isUserVerification = false;
+        boolean isUserVerification = true;
         if (!users.isEmpty()) {
             for (User userSearch : users.values()) {
                 if (userSearch.getEmail().equals(user.getEmail())) {
                     log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирована ранее");
+                    isUserVerification = false;
                     break;
-                } else {
-                    log.info("Почта не была зарегистрирована ранее");
-                    isUserVerification = true;
                 }
             }
-
-        } else {
-            isUserVerification = true;
         }
         return isUserVerification;
     }
-
-
 }
