@@ -58,19 +58,18 @@ class UserTest {
             assertEquals(e.getMessage(),"login is marked non-null but is null");
         }
     }
+
     @Test
     @DisplayName("Проверка создание объекта без имени")
     void createUserNameNull() {
-        try{
             User user = User.builder()
                     .email("ivanov@yandex.ru")
                     .login("VladIvanov")
                     .name(null)
                     .birthday(LocalDate.parse("1989-01-01"))
                     .build();
-        } catch (Exception e){
-            assertEquals(e.getMessage(),"name is marked non-null but is null");
-        }
+            assertEquals(user.getName(), null);
+
     }
     @Test
     @DisplayName("Проверка создание объекта без даты рождения")

@@ -18,5 +18,4 @@ public class User {
     private String name;
     @NonNull
     private LocalDate birthday;
-
 }

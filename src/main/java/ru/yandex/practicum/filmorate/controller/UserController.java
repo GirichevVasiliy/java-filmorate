@@ -45,6 +45,9 @@ public class UserController {
                     final String login = user.getLogin();
                     users.get(user.getId()).setLogin(login);
                 }
+                if (Objects.isNull(user.getName())) {
+                    user.setName(user.getLogin());
+                }
                 if (!(users.get(user.getId()).getName().equals(user.getName()))) {
                     final String name = user.getName();
                     users.get(user.getId()).setName(name);
