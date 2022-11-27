@@ -20,7 +20,7 @@ class UserTest {
                 .birthday(LocalDate.parse("1989-01-01"))
                 .build();
         assertAll(
-                () -> assertTrue(user.getId() == idUser1, "id не совпал"),
+                () -> assertEquals(idUser1, user.getId(), "id не совпал"),
                 () -> assertEquals(user.getEmail(), "ivanov@yandex.ru", "Почта пользователя не совпала"),
                 () -> assertEquals(user.getLogin(), "VladIvanov", "Логин пользователя не совпал"),
                 () -> assertEquals(user.getName(), "Vlad Ivanov", "Имя пользователя не совпало"),
@@ -29,59 +29,62 @@ class UserTest {
 
         );
     }
+
     @Test
     @DisplayName("Проверка создание объекта без почты")
     void createUserEmailNull() {
-        try{
+        try {
             User user = User.builder()
                     .email(null)
                     .login("VladIvanov")
                     .name("Vlad Ivanov")
                     .birthday(LocalDate.parse("1989-01-01"))
                     .build();
-        } catch (Exception e){
-           assertEquals(e.getMessage(),"email is marked non-null but is null");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "email is marked non-null but is null");
         }
     }
+
     @Test
     @DisplayName("Проверка создание объекта без логина")
     void createUserLoginNull() {
-        try{
+        try {
             User user = User.builder()
                     .email("ivanov@yandex.ru")
                     .login(null)
                     .name("Vlad Ivanov")
                     .birthday(LocalDate.parse("1989-01-01"))
                     .build();
-        } catch (Exception e){
-            assertEquals(e.getMessage(),"login is marked non-null but is null");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "login is marked non-null but is null");
         }
     }
 
     @Test
     @DisplayName("Проверка создание объекта без имени")
     void createUserNameNull() {
-            User user = User.builder()
-                    .email("ivanov@yandex.ru")
-                    .login("VladIvanov")
-                    .name(null)
-                    .birthday(LocalDate.parse("1989-01-01"))
-                    .build();
-            assertEquals(user.getName(), null);
+        User user = User.builder()
+                .email("ivanov@yandex.ru")
+                .login("VladIvanov")
+                .name(null)
+                .birthday(LocalDate.parse("1989-01-01"))
+                .build();
+        assertNull(user.getName());
 
     }
+
     @Test
     @DisplayName("Проверка создание объекта без даты рождения")
     void createUserBirthdayNull() {
-        try{
+        try {
             User user = User.builder()
                     .email("ivanov@yandex.ru")
                     .login("VladIvanov")
                     .name("Vlad Ivanov")
                     .birthday(null)
                     .build();
-        } catch (Exception e){
-            assertEquals(e.getMessage(),"birthday is marked non-null but is null");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "birthday is marked non-null but is null");
         }
     }
 }

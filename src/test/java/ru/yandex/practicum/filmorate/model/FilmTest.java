@@ -20,15 +20,14 @@ class FilmTest {
                 .duration(300)
                 .build();
         assertAll(
-                () -> assertTrue(film.getId() == idFilm, "id не совпал"),
+                () -> assertEquals(idFilm, film.getId(), "id не совпал"),
                 () -> assertEquals(film.getName(), "Futurama", "Название фильма не совпало"),
                 () -> assertEquals(film.getDescription(),
                         "American science fiction satirical adult animated television series",
                         "Описание фильма не совпало"),
                 () -> assertEquals(film.getReleaseDate(), LocalDate.parse("1999-03-28"),
                         "Дата релиза фильма не совпала"),
-                () -> assertTrue(film.getDuration() == filmDuration,
-                        "Продолжительность фильма не совпала")
+                () -> assertEquals(filmDuration, film.getDuration(), "Продолжительность фильма не совпала")
         );
     }
 

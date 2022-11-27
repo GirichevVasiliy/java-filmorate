@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/films")
@@ -19,41 +20,49 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
-        if (filmVerification(film) && filmValidation(film)) {
-            generateIdFilms(film);
-            films.put(film.getId(), film);
-            log.info("Получен запрос к эндпоинту: Добавление нового фильма "  + film.getName() + " - выполнено");
-            return film;
+        if (!Objects.isNull(film)) {
+            if (filmVerification(film) && filmValidation(film)) {
+                generateIdFilms(film);
+                films.put(film.getId(), film);
+                log.info("Получен запрос к эндпоинту: Добавление нового фильма " + film.getName() + " - выполнено");
+                return film;
+            } else {
+                log.warn("Получен запрос к эндпоинту: Добавление нового фильма " + film.getName() + " - не выполнен");
+                throw new ValidationException("Фильм " + film.getName() + " не сохранен, он был зарегистрирован ранее");
+            }
         } else {
-            log.warn("Получен запрос к эндпоинту: Добавление нового фильма "  + film.getName() + " - не выполнен");
-            throw new ValidationException("Фильм " + film.getName() + " не сохранен, он был зарегистрирован ранее");
+            throw new RuntimeException("Ошибка, фильм не задан");
         }
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
-            if (filmValidation(film)) {
-                if (!(films.get(film.getId()).getName().equals(film.getName()))) {
-                    final String name = film.getName();
-                    films.get(film.getId()).setName(name);
+        if (!Objects.isNull(film)) {
+            if (films.containsKey(film.getId())) {
+                if (filmValidation(film)) {
+                    if (!(films.get(film.getId()).getName().equals(film.getName()))) {
+                        final String name = film.getName();
+                        films.get(film.getId()).setName(name);
+                    }
+                    if (!(films.get(film.getId()).getDescription().equals(film.getDescription()))) {
+                        final String description = film.getDescription();
+                        films.get(film.getId()).setDescription(description);
+                    }
+                    if (!(films.get(film.getId()).getReleaseDate().equals(film.getReleaseDate()))) {
+                        final LocalDate releaseDate = film.getReleaseDate();
+                        films.get(film.getId()).setReleaseDate(releaseDate);
+                    }
+                    if (!(films.get(film.getId()).getDuration() == (film.getDuration()))) {
+                        final int duration = film.getDuration();
+                        films.get(film.getId()).setDuration(duration);
+                    }
                 }
-                if (!(films.get(film.getId()).getDescription().equals(film.getDescription()))) {
-                    final String description = film.getDescription();
-                    films.get(film.getId()).setDescription(description);
-                }
-                if (!(films.get(film.getId()).getReleaseDate().equals(film.getReleaseDate()))) {
-                    final LocalDate releaseDate = film.getReleaseDate();
-                    films.get(film.getId()).setReleaseDate(releaseDate);
-                }
-                if (!(films.get(film.getId()).getDuration() == (film.getDuration()))) {
-                    final int duration = film.getDuration();
-                    films.get(film.getId()).setDuration(duration);
-                }
+                return film;
+            } else {
+                throw new ValidationException("Фильм не обновлен");
             }
-            return film;
         } else {
-            throw new ValidationException("Фильм не обновлен");
+            throw new RuntimeException("Ошибка, фильм не задан");
         }
     }
 

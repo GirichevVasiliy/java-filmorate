@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -82,7 +81,7 @@ class FilmControllerTest {
                     () -> assertEquals(e.getMessage(), "Название фильма не может быть пустым.",
                             "Тест без имени фильма провален"),
                     () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
-                    );
+            );
         }
     }
 
@@ -114,7 +113,7 @@ class FilmControllerTest {
     }
 
     @Test
-    @DisplayName("Тест создания и валидации фильма дата релиза — не раньше 28 декабря 1895 года")
+    @DisplayName("Тест создания и валидации фильма, дата релиза — не раньше 28 декабря 1895 года")
     void createFilmAndValidationDateOfReleaseTest() {
         Film film = Film.builder()
                 .name("Futurama")
@@ -168,13 +167,189 @@ class FilmControllerTest {
         }
     }
 
-
     @Test
-    void updateFilm() {
-
+    @DisplayName("Тест создания и валидации несуществующего фильма")
+    void createFilmAndValidationFilmNullTest() {
+        Film film = null;
+        try {
+            filmController.createFilm(film);
+        } catch (RuntimeException e) {
+            assertAll(
+                    () -> assertEquals(e.getMessage(), "Ошибка, фильм не задан",
+                            "Тест обновления фильма провален провален")
+            );
+        }
     }
 
     @Test
+    @DisplayName("Тест обновления фильмов")
+    void updateFilmStandardTest() {
+        final int idFilm0 = 1;
+        final int idFilm1 = 2;
+        initFilms();
+        final Film film0Control = Film.builder()
+                .id(idFilm0)
+                .name("Fu-tu-ra-ma")
+                .description("American science fiction satirical adult animated television series")
+                .releaseDate(LocalDate.parse("1999-03-28"))
+                .duration(310)
+                .build();
+        filmController.updateFilm(film0Control);
+        final Film film1Control = Film.builder()
+                .id(idFilm1)
+                .name("Harry-Potter")
+                .description("Harry enters Hogwarts School.")
+                .releaseDate(LocalDate.parse("2000-10-12"))
+                .duration(252)
+                .build();
+        filmController.updateFilm(film1Control);
+
+        assertAll(
+                () -> assertTrue(filmController.getFilms().containsValue(film0Control), "Фильм не сохранен"),
+                () -> assertEquals(film0Control, filmController.getFilms().get(film0Control.getId()),
+                        "Фильмы не одинаковые"),
+                () -> assertEquals(film0, filmController.getFilms().get(film0Control.getId()),
+                        "Фильмы не одинаковые")
+        );
+
+        assertAll(
+                () -> assertTrue(filmController.getFilms().containsValue(film1Control), "Фильм не сохранен"),
+                () -> assertEquals(film1, filmController.getFilms().get(film1Control.getId()),
+                        "Фильмы не одинаковые"),
+                () -> assertEquals(film1, filmController.getFilms().get(film1Control.getId()),
+                        "Фильмы не одинаковые")
+        );
+    }
+
+    @Test
+    @DisplayName("Тест обновления и валидации фильма без названия")
+    void updateFilmAndValidationNameIsBlankTest() {
+        initFilms();
+        final int idFilm = 1;
+        Film film = Film.builder()
+                .id(idFilm)
+                .name("")
+                .description("American science fiction satirical adult animated television series")
+                .releaseDate(LocalDate.parse("2002-03-28"))
+                .duration(154)
+                .build();
+        try {
+            filmController.updateFilm(film);
+        } catch (ValidationException e) {
+            assertAll(
+                    () -> assertEquals(e.getMessage(), "Название фильма не может быть пустым.",
+                            "Тест без имени фильма провален"),
+                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Тест обновления и валидации фильма максимальная длина описания более 200 символов")
+    void updateFilmAndValidationDescriptionLengthOver200Test() {
+        final int maxLengthDescription = 200;
+        final int idFilm = 1;
+        initFilms();
+        Film film = Film.builder()
+                .id(idFilm)
+                .name("Futurama")
+                .description("Futurama is an American adult sci-fi satirical animated television series created " +
+                        "at 20th Century Fox by Matt Groening and David Cohen, creators of The Simpsons. " +
+                        "On February 9, it was announced that streaming service Hulu was resurrecting the " +
+                        "series and had already ordered 20 new episodes.")
+                .releaseDate(LocalDate.parse("1999-03-28"))
+                .duration(300)
+                .build();
+        try {
+            filmController.updateFilm(film);
+        } catch (ValidationException e) {
+            assertAll(
+                    () -> assertTrue(film.getDescription().length() > maxLengthDescription,
+                            " В тесте не хватает символов"),
+                    () -> assertEquals(e.getMessage(), "Максимальная длина описания более 200 символов.",
+                            "Тест длины описания провален"),
+                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Тест обновления и валидации фильма, дата релиза — не раньше 28 декабря 1895 года")
+    void updateFilmAndValidationDateOfReleaseTest() {
+        final int idFilm = 1;
+        initFilms();
+        Film film = Film.builder()
+                .id(idFilm)
+                .name("Futurama")
+                .description("American science fiction satirical adult animated television series")
+                .releaseDate(LocalDate.parse("1800-03-28"))
+                .duration(300)
+                .build();
+        try {
+            filmController.updateFilm(film);
+        } catch (ValidationException e) {
+            assertAll(
+                    () -> assertEquals(e.getMessage(), "Дата релиза раньше 28 декабря 1895 года",
+                            "Тест даты релиза провален провален"),
+                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+            );
+        }
+        Film film3 = Film.builder()
+                .name("Futurama")
+                .description("American science fiction satirical adult animated television series")
+                .releaseDate(LocalDate.parse("2002-03-28"))
+                .duration(300)
+                .build();
+        try {
+            filmController.createFilm(film3);
+        } catch (ValidationException e) {
+            assertAll(
+                    () -> assertFalse(filmController.getFilms().containsValue(film3), "Фильм сохранен")
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Тест обновления и валидации фильма продолжительность фильма должна быть положительной")
+    void updateFilmAndValidationDurationTest() {
+        final int durationZero = 0;
+        final int idFilm = 1;
+        initFilms();
+        Film film = Film.builder()
+                .id(idFilm)
+                .name("Futurama")
+                .description("American science fiction satirical adult animated television series")
+                .releaseDate(LocalDate.parse("2002-03-28"))
+                .duration(-1)
+                .build();
+        try {
+            filmController.createFilm(film);
+        } catch (ValidationException e) {
+            assertAll(
+                    () -> assertTrue(film.getDuration() < durationZero, "Продолжительность положительная"),
+                    () -> assertEquals(e.getMessage(), "Продолжительность фильма должна быть положительной.",
+                            "Тест продолжительности фильма провален провален"),
+                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Тест обновления и валидации несуществующего фильма")
+    void updateFilmAndValidationFilmNullTest() {
+        Film film = null;
+        try {
+            filmController.updateFilm(film);
+        } catch (RuntimeException e) {
+            assertAll(
+                    () -> assertEquals(e.getMessage(), "Ошибка, фильм не задан",
+                            "Тест обновления фильма провален провален")
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Получение списка всех фильмов")
     void findAllFilms() {
         final int size = 3;
         initFilms();
@@ -183,7 +358,7 @@ class FilmControllerTest {
                 () -> assertTrue(listOfAllFilm.size() == size, "Размер списка всех фильмов больше, " +
                         "тест провален"),
                 () -> assertTrue(listOfAllFilm.contains(film0), "Фильм с id = 0 не найден"),
-                () -> assertTrue(listOfAllFilm.contains(film1),"Фильм с id = 1 не найден"),
+                () -> assertTrue(listOfAllFilm.contains(film1), "Фильм с id = 1 не найден"),
                 () -> assertTrue(listOfAllFilm.contains(film2), "Фильм с id = 2 не найден")
         );
     }

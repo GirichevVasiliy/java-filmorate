@@ -7,7 +7,10 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @RequestMapping("/users")
 @RestController
@@ -19,44 +22,52 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User newUser) {
-        if (userVerification(newUser) && userValidation(newUser)) {
-            generateIdUser(newUser);
-            users.put(newUser.getId(), newUser);
-            log.info("Получен запрос к эндпоинту: Создания пользователя - выполнено успешно");
-            return newUser;
+        if (!Objects.isNull(newUser)) {
+            if (userVerification(newUser) && userValidation(newUser)) {
+                generateIdUser(newUser);
+                users.put(newUser.getId(), newUser);
+                log.info("Получен запрос к эндпоинту: Создания пользователя - выполнено успешно");
+                return newUser;
+            } else {
+                log.warn("Получен запрос к эндпоинту: Создания пользователя - не выполнен");
+                throw new ValidationException("Пользователь не сохранен, такой Email уже зарегистрирован");
+            }
         } else {
-            log.warn("Получен запрос к эндпоинту: Создания пользователя - не выполнен");
-            throw new ValidationException("Пользователь не сохранен, такой Email уже зарегистрирован");
+            throw new RuntimeException("Ошибка, пользователь не задан");
         }
     }
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            if (userValidation(user)) {
-                if (!(users.get(user.getId()).getEmail().equals(user.getEmail()))) {
-                    final String email = user.getEmail();
-                    users.get(user.getId()).setEmail(email);
+        if (!Objects.isNull(user)) {
+            if (users.containsKey(user.getId())) {
+                if (userValidation(user)) {
+                    if (!(users.get(user.getId()).getEmail().equals(user.getEmail()))) {
+                        final String email = user.getEmail();
+                        users.get(user.getId()).setEmail(email);
+                    }
+                    if (!(users.get(user.getId()).getLogin().equals(user.getLogin()))) {
+                        final String login = user.getLogin();
+                        users.get(user.getId()).setLogin(login);
+                    }
+                    if (Objects.isNull(user.getName())) {
+                        user.setName(user.getLogin());
+                    }
+                    if (!(users.get(user.getId()).getName().equals(user.getName()))) {
+                        final String name = user.getName();
+                        users.get(user.getId()).setName(name);
+                    }
+                    if (!(users.get(user.getId()).getBirthday().equals(user.getBirthday()))) {
+                        final LocalDate birthday = user.getBirthday();
+                        users.get(user.getId()).setBirthday(birthday);
+                    }
                 }
-                if (!(users.get(user.getId()).getLogin().equals(user.getLogin()))) {
-                    final String login = user.getLogin();
-                    users.get(user.getId()).setLogin(login);
-                }
-                if (Objects.isNull(user.getName())) {
-                    user.setName(user.getLogin());
-                }
-                if (!(users.get(user.getId()).getName().equals(user.getName()))) {
-                    final String name = user.getName();
-                    users.get(user.getId()).setName(name);
-                }
-                if (!(users.get(user.getId()).getBirthday().equals(user.getBirthday()))) {
-                    final LocalDate birthday = user.getBirthday();
-                    users.get(user.getId()).setBirthday(birthday);
-                }
+                return user;
+            } else {
+                throw new ValidationException("Пользователь не обновлен");
             }
-            return user;
         } else {
-            throw new ValidationException("Пользователь не обновлен");
+            throw new RuntimeException("Ошибка, пользователь не задан");
         }
     }
 
