@@ -42,24 +42,25 @@ public class UserController {
         if (!Objects.isNull(user)) {
             if (users.containsKey(user.getId())) {
                 if (userValidation(user)) {
-                    if (!(users.get(user.getId()).getEmail().equals(user.getEmail()))) {
+                    final User savedUser = users.get(user.getId());
+                    if (!(savedUser.getEmail().equals(user.getEmail()))) {
                         final String email = user.getEmail();
-                        users.get(user.getId()).setEmail(email);
+                        savedUser.setEmail(email);
                     }
-                    if (!(users.get(user.getId()).getLogin().equals(user.getLogin()))) {
+                    if (!(savedUser.getLogin().equals(user.getLogin()))) {
                         final String login = user.getLogin();
-                        users.get(user.getId()).setLogin(login);
+                        savedUser.setLogin(login);
                     }
                     if (Objects.isNull(user.getName())) {
                         user.setName(user.getLogin());
                     }
-                    if (!(users.get(user.getId()).getName().equals(user.getName()))) {
+                    if (!(savedUser.getName().equals(user.getName()))) {
                         final String name = user.getName();
-                        users.get(user.getId()).setName(name);
+                        savedUser.setName(name);
                     }
-                    if (!(users.get(user.getId()).getBirthday().equals(user.getBirthday()))) {
+                    if (!(savedUser.getBirthday().equals(user.getBirthday()))) {
                         final LocalDate birthday = user.getBirthday();
-                        users.get(user.getId()).setBirthday(birthday);
+                        savedUser.setBirthday(birthday);
                     }
                 }
                 return user;
@@ -121,12 +122,9 @@ public class UserController {
     private boolean userVerification(User user) {
         boolean isUserVerification = true;
         if (!users.isEmpty()) {
-            for (User userSearch : users.values()) {
-                if (userSearch.getEmail().equals(user.getEmail())) {
-                    log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирована ранее");
-                    isUserVerification = false;
-                    break;
-                }
+            if (users.containsValue(user)) {
+                log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирован ранее");
+                isUserVerification = false;
             }
         }
         return isUserVerification;

@@ -33,31 +33,27 @@ class UserTest {
     @Test
     @DisplayName("Проверка создание объекта без почты")
     void createUserEmailNull() {
-        try {
-            User user = User.builder()
+        assertThrows(NullPointerException.class, () -> {
+            User.builder()
                     .email(null)
                     .login("VladIvanov")
                     .name("Vlad Ivanov")
                     .birthday(LocalDate.parse("1989-01-01"))
                     .build();
-        } catch (Exception e) {
-            assertEquals(e.getMessage(), "email is marked non-null but is null");
-        }
+        }, "Тест по созданию объекта без без почты");
     }
 
     @Test
     @DisplayName("Проверка создание объекта без логина")
     void createUserLoginNull() {
-        try {
-            User user = User.builder()
+        assertThrows(NullPointerException.class, () -> {
+            User.builder()
                     .email("ivanov@yandex.ru")
                     .login(null)
                     .name("Vlad Ivanov")
                     .birthday(LocalDate.parse("1989-01-01"))
                     .build();
-        } catch (Exception e) {
-            assertEquals(e.getMessage(), "login is marked non-null but is null");
-        }
+        }, "Тест по созданию объекта без без почты");
     }
 
     @Test
@@ -76,16 +72,14 @@ class UserTest {
     @Test
     @DisplayName("Проверка создание объекта без даты рождения")
     void createUserBirthdayNull() {
-        try {
-            User user = User.builder()
+        assertThrows(NullPointerException.class, () -> {
+            User.builder()
                     .email("ivanov@yandex.ru")
                     .login("VladIvanov")
                     .name("Vlad Ivanov")
                     .birthday(null)
                     .build();
-        } catch (Exception e) {
-            assertEquals(e.getMessage(), "birthday is marked non-null but is null");
-        }
+        }, "Тест по созданию объекта без без почты");
     }
 }
 

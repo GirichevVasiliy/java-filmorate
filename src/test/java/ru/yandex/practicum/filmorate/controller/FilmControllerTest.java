@@ -53,15 +53,21 @@ class FilmControllerTest {
     void createFilmAndValidationStandardTest() {
         initFilms();
         assertAll(
-                () -> assertTrue(filmController.getFilms().containsValue(film0), "Фильм не сохранен"),
-                () -> assertTrue(filmController.getFilms().containsValue(film1), "Фильм не сохранен"),
-                () -> assertTrue(filmController.getFilms().containsValue(film2), "Фильм не сохранен"),
+                () -> assertTrue(filmController.getFilms().containsValue(film0),
+                        "Фильм " + film0.getName() + " не сохранен"),
+                () -> assertTrue(filmController.getFilms().containsValue(film1),
+                        "Фильм " + film1.getName() + " не сохранен"),
+                () -> assertTrue(filmController.getFilms().containsValue(film2),
+                        "Фильм " + film2.getName() + " не сохранен"),
                 () -> assertEquals(film0, filmController.getFilms().get(film0.getId()),
-                        "Фильмы не одинаковые"),
+                        "Фильмы "+ film0.getName() + " и " +
+                                filmController.getFilms().get(film0.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film1, filmController.getFilms().get(film1.getId()),
-                        "Фильмы не одинаковые"),
+                        "Фильмы "+ film1.getName() + " и " +
+                                filmController.getFilms().get(film1.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film2, filmController.getFilms().get(film2.getId()),
-                        "Фильмы не одинаковые")
+                        "Фильмы "+ film2.getName() + " и " +
+                                filmController.getFilms().get(film2.getId()).getName() + " не одинаковые")
         );
     }
 
@@ -80,7 +86,8 @@ class FilmControllerTest {
             assertAll(
                     () -> assertEquals(e.getMessage(), "Название фильма не может быть пустым.",
                             "Тест без имени фильма провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
     }
@@ -107,7 +114,8 @@ class FilmControllerTest {
                             " В тесте не хватает символов"),
                     () -> assertEquals(e.getMessage(), "Максимальная длина описания более 200 символов.",
                             "Тест длины описания провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
     }
@@ -127,7 +135,8 @@ class FilmControllerTest {
             assertAll(
                     () -> assertEquals(e.getMessage(), "Дата релиза раньше 28 декабря 1895 года",
                             "Тест даты релиза провален провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
         Film film3 = Film.builder()
@@ -140,7 +149,8 @@ class FilmControllerTest {
             filmController.createFilm(film3);
         } catch (ValidationException e) {
             assertAll(
-                    () -> assertFalse(filmController.getFilms().containsValue(film3), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film3),
+                            "Фильм " + film3.getName() + " сохранен")
             );
         }
     }
@@ -162,7 +172,8 @@ class FilmControllerTest {
                     () -> assertTrue(film.getDuration() < durationZero, "Продолжительность положительная"),
                     () -> assertEquals(e.getMessage(), "Продолжительность фильма должна быть положительной.",
                             "Тест продолжительности фильма провален провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
     }
@@ -205,19 +216,25 @@ class FilmControllerTest {
         filmController.updateFilm(film1Control);
 
         assertAll(
-                () -> assertTrue(filmController.getFilms().containsValue(film0Control), "Фильм не сохранен"),
+                () -> assertTrue(filmController.getFilms().containsValue(film0Control),
+                        "Фильм " + film0Control.getName() + " не сохранен"),
                 () -> assertEquals(film0Control, filmController.getFilms().get(film0Control.getId()),
-                        "Фильмы не одинаковые"),
+                        "Фильмы "+ film0Control.getName() + " и " +
+                                filmController.getFilms().get(film0Control.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film0, filmController.getFilms().get(film0Control.getId()),
-                        "Фильмы не одинаковые")
+                        "Фильмы "+ film0.getName() + " и " +
+                                filmController.getFilms().get(film0Control.getId()).getName() + " не одинаковые")
         );
 
         assertAll(
-                () -> assertTrue(filmController.getFilms().containsValue(film1Control), "Фильм не сохранен"),
+                () -> assertTrue(filmController.getFilms().containsValue(film1Control),
+                        "Фильм " + film1Control.getName() + " не сохранен"),
                 () -> assertEquals(film1, filmController.getFilms().get(film1Control.getId()),
-                        "Фильмы не одинаковые"),
+                        "Фильмы "+ film1.getName() + " и " +
+                                filmController.getFilms().get(film1.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film1, filmController.getFilms().get(film1Control.getId()),
-                        "Фильмы не одинаковые")
+                        "Фильмы "+ film1.getName() + " и " +
+                                filmController.getFilms().get(film1Control.getId()).getName() + " не одинаковые")
         );
     }
 
@@ -239,7 +256,8 @@ class FilmControllerTest {
             assertAll(
                     () -> assertEquals(e.getMessage(), "Название фильма не может быть пустым.",
                             "Тест без имени фильма провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
     }
@@ -268,7 +286,8 @@ class FilmControllerTest {
                             " В тесте не хватает символов"),
                     () -> assertEquals(e.getMessage(), "Максимальная длина описания более 200 символов.",
                             "Тест длины описания провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
     }
@@ -291,7 +310,8 @@ class FilmControllerTest {
             assertAll(
                     () -> assertEquals(e.getMessage(), "Дата релиза раньше 28 декабря 1895 года",
                             "Тест даты релиза провален провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
         Film film3 = Film.builder()
@@ -304,7 +324,8 @@ class FilmControllerTest {
             filmController.createFilm(film3);
         } catch (ValidationException e) {
             assertAll(
-                    () -> assertFalse(filmController.getFilms().containsValue(film3), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film3),
+                            "Фильм " + film3.getName() + " сохранен")
             );
         }
     }
@@ -329,7 +350,8 @@ class FilmControllerTest {
                     () -> assertTrue(film.getDuration() < durationZero, "Продолжительность положительная"),
                     () -> assertEquals(e.getMessage(), "Продолжительность фильма должна быть положительной.",
                             "Тест продолжительности фильма провален провален"),
-                    () -> assertFalse(filmController.getFilms().containsValue(film), "Фильм сохранен")
+                    () -> assertFalse(filmController.getFilms().containsValue(film),
+                            "Фильм " + film.getName() + " сохранен")
             );
         }
     }

@@ -40,21 +40,22 @@ public class FilmController {
         if (!Objects.isNull(film)) {
             if (films.containsKey(film.getId())) {
                 if (filmValidation(film)) {
-                    if (!(films.get(film.getId()).getName().equals(film.getName()))) {
+                    final Film savedFilm = films.get(film.getId());
+                    if (!(savedFilm.getName().equals(film.getName()))) {
                         final String name = film.getName();
-                        films.get(film.getId()).setName(name);
+                        savedFilm.setName(name);
                     }
-                    if (!(films.get(film.getId()).getDescription().equals(film.getDescription()))) {
+                    if (!(savedFilm.getDescription().equals(film.getDescription()))) {
                         final String description = film.getDescription();
-                        films.get(film.getId()).setDescription(description);
+                        savedFilm.setDescription(description);
                     }
-                    if (!(films.get(film.getId()).getReleaseDate().equals(film.getReleaseDate()))) {
+                    if (!(savedFilm.getReleaseDate().equals(film.getReleaseDate()))) {
                         final LocalDate releaseDate = film.getReleaseDate();
-                        films.get(film.getId()).setReleaseDate(releaseDate);
+                        savedFilm.setReleaseDate(releaseDate);
                     }
-                    if (!(films.get(film.getId()).getDuration() == (film.getDuration()))) {
+                    if (!(savedFilm.getDuration() == (film.getDuration()))) {
                         final int duration = film.getDuration();
-                        films.get(film.getId()).setDuration(duration);
+                        savedFilm.setDuration(duration);
                     }
                 }
                 return film;
@@ -83,7 +84,7 @@ public class FilmController {
             if (film.getName().isBlank()) {
                 log.warn("Валидация названия фильма " + film.getName() + " завершена ошибкой");
                 throw new ValidationException("Название фильма не может быть пустым.");
-            } else if (film.getDescription().length() >= maxDescriptionLength) {
+            } else if (film.getDescription().length() > maxDescriptionLength) {
                 log.warn("Валидация описания фильма " + film.getName() + " завершена ошибкой");
                 throw new ValidationException("Максимальная длина описания более 200 символов.");
             } else if (film.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
@@ -103,12 +104,9 @@ public class FilmController {
     private boolean filmVerification(Film film) {
         boolean isFilmVerification = true;
         if (!films.isEmpty()) {
-            for (Film filmSearch : films.values()) {
-                if (filmSearch.getName().equals(film.getName()) && filmSearch.getDuration() == (film.getDuration())) {
-                    log.warn("Фильм: " + film.getName() + " зарегистрирован ранее");
-                    isFilmVerification = false;
-                    break;
-                }
+            if (films.containsValue(film)) {
+                log.warn("Фильм: " + film.getName() + " зарегистрирован ранее");
+                isFilmVerification = false;
             }
         }
         return isFilmVerification;
