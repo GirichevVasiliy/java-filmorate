@@ -2,20 +2,19 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<String, LocalDate> databaseOfFilmsForVerification = new TreeMap<>();
     private int id;
 
     @PostMapping
@@ -24,6 +23,7 @@ public class FilmController {
             if (filmVerification(film) && filmValidation(film)) {
                 generateIdFilms(film);
                 films.put(film.getId(), film);
+                databaseOfFilmsForVerification.put(film.getName(), film.getReleaseDate());
                 log.info("Получен запрос к эндпоинту: Добавление нового фильма " + film.getName() + " - выполнено");
                 return film;
             } else {
@@ -60,7 +60,7 @@ public class FilmController {
                 }
                 return film;
             } else {
-                throw new ValidationException("Фильм не обновлен");
+                throw new ResourceNotFoundException("Фильм " + film.getName() + " не обновлен");
             }
         } else {
             throw new RuntimeException("Ошибка, фильм не задан");
@@ -103,8 +103,9 @@ public class FilmController {
 
     private boolean filmVerification(Film film) {
         boolean isFilmVerification = true;
-        if (!films.isEmpty()) {
-            if (films.containsValue(film)) {
+        if (!films.isEmpty() && !databaseOfFilmsForVerification.isEmpty()) {
+            if (databaseOfFilmsForVerification.containsKey(film.getName()) &&
+                    databaseOfFilmsForVerification.containsValue(film.getReleaseDate())) {
                 log.warn("Фильм: " + film.getName() + " зарегистрирован ранее");
                 isFilmVerification = false;
             }

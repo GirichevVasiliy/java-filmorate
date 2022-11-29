@@ -60,15 +60,24 @@ class FilmControllerTest {
                 () -> assertTrue(filmController.getFilms().containsValue(film2),
                         "Фильм " + film2.getName() + " не сохранен"),
                 () -> assertEquals(film0, filmController.getFilms().get(film0.getId()),
-                        "Фильмы "+ film0.getName() + " и " +
+                        "Фильмы " + film0.getName() + " и " +
                                 filmController.getFilms().get(film0.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film1, filmController.getFilms().get(film1.getId()),
-                        "Фильмы "+ film1.getName() + " и " +
+                        "Фильмы " + film1.getName() + " и " +
                                 filmController.getFilms().get(film1.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film2, filmController.getFilms().get(film2.getId()),
-                        "Фильмы "+ film2.getName() + " и " +
+                        "Фильмы " + film2.getName() + " и " +
                                 filmController.getFilms().get(film2.getId()).getName() + " не одинаковые")
         );
+    }
+
+    @Test
+    @DisplayName("Тест создания и валидации повторяющегося пользователя")
+    void createFilmAndValidationRepeatingTest() {
+        initFilms();
+        assertThrows(ValidationException.class, () -> {
+            filmController.createFilm(film0);
+        }, "Тест создания и валидации повторяющегося фильма провален");
     }
 
     @Test
@@ -219,10 +228,10 @@ class FilmControllerTest {
                 () -> assertTrue(filmController.getFilms().containsValue(film0Control),
                         "Фильм " + film0Control.getName() + " не сохранен"),
                 () -> assertEquals(film0Control, filmController.getFilms().get(film0Control.getId()),
-                        "Фильмы "+ film0Control.getName() + " и " +
+                        "Фильмы " + film0Control.getName() + " и " +
                                 filmController.getFilms().get(film0Control.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film0, filmController.getFilms().get(film0Control.getId()),
-                        "Фильмы "+ film0.getName() + " и " +
+                        "Фильмы " + film0.getName() + " и " +
                                 filmController.getFilms().get(film0Control.getId()).getName() + " не одинаковые")
         );
 
@@ -230,10 +239,10 @@ class FilmControllerTest {
                 () -> assertTrue(filmController.getFilms().containsValue(film1Control),
                         "Фильм " + film1Control.getName() + " не сохранен"),
                 () -> assertEquals(film1, filmController.getFilms().get(film1Control.getId()),
-                        "Фильмы "+ film1.getName() + " и " +
+                        "Фильмы " + film1.getName() + " и " +
                                 filmController.getFilms().get(film1.getId()).getName() + " не одинаковые"),
                 () -> assertEquals(film1, filmController.getFilms().get(film1Control.getId()),
-                        "Фильмы "+ film1.getName() + " и " +
+                        "Фильмы " + film1.getName() + " и " +
                                 filmController.getFilms().get(film1Control.getId()).getName() + " не одинаковые")
         );
     }

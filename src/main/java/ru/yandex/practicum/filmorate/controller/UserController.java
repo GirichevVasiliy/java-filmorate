@@ -3,14 +3,12 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RequestMapping("/users")
 @RestController
@@ -18,6 +16,7 @@ import java.util.Objects;
 public class UserController {
     @Getter
     private final Map<Integer, User> users = new HashMap<>();
+    private final Set<String> emails = new TreeSet<>();
     private int id;
 
     @PostMapping
@@ -26,11 +25,13 @@ public class UserController {
             if (userVerification(newUser) && userValidation(newUser)) {
                 generateIdUser(newUser);
                 users.put(newUser.getId(), newUser);
+                emails.add(newUser.getEmail());
                 log.info("Получен запрос к эндпоинту: Создания пользователя - выполнено успешно");
                 return newUser;
             } else {
                 log.warn("Получен запрос к эндпоинту: Создания пользователя - не выполнен");
-                throw new ValidationException("Пользователь не сохранен, такой Email уже зарегистрирован");
+                throw new ValidationException("Пользователь " + newUser.getEmail() +
+                        " не сохранен, такой Email уже зарегистрирован");
             }
         } else {
             throw new RuntimeException("Ошибка, пользователь не задан");
@@ -65,7 +66,7 @@ public class UserController {
                 }
                 return user;
             } else {
-                throw new ValidationException("Пользователь не обновлен");
+                throw new ResourceNotFoundException("Пользователь не обновлен");
             }
         } else {
             throw new RuntimeException("Ошибка, пользователь не задан");
@@ -121,8 +122,8 @@ public class UserController {
 
     private boolean userVerification(User user) {
         boolean isUserVerification = true;
-        if (!users.isEmpty()) {
-            if (users.containsValue(user)) {
+        if (!users.isEmpty() && !emails.isEmpty()) {
+            if (emails.contains(user.getEmail())) {
                 log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирован ранее");
                 isUserVerification = false;
             }

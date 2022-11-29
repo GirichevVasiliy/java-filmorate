@@ -77,6 +77,26 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Тест создания и валидации повторяющегося пользователя")
+    void createUserAndValidationRepeatingTest() {
+        final User user1 = User.builder()
+                .email("girichev@yandex.ru")
+                .login("VasiliyGir")
+                .name("Vasiliy Girichev")
+                .birthday(LocalDate.parse("1987-02-26"))
+                .build();
+        userController.createUser(user1);
+        assertAll(
+                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
+                () -> assertEquals(user1, userController.getUsers().get(user1.getId()),
+                        "Пользователи не одинаковые")
+        );
+        assertThrows(ValidationException.class, () -> {
+            userController.createUser(user1);
+        }, "Тест создания и валидации повторяющегося пользователя провален");
+    }
+
+    @Test
     @DisplayName("Тест создания и валидации несуществующего пользователя")
     void createUserAndValidationUserIsNullTest() {
         User user = null;
