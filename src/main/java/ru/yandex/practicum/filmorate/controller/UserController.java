@@ -16,7 +16,7 @@ import java.util.*;
 public class UserController {
     @Getter
     private final Map<Integer, User> users = new HashMap<>();
-    private final Set<String> emails = new TreeSet<>();
+    private final Set<String> emails = new HashSet<>();
     private int id;
 
     @PostMapping
@@ -114,8 +114,6 @@ public class UserController {
 
     private void generateIdUser(User user) {
         if (user.getId() == 0) {
-            user.setId(++id);
-        } else if ((user.getId() > id) || (user.getId() < id)) {
             user.setId(++id);
         }
     }

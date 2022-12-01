@@ -116,8 +116,6 @@ public class FilmController {
     private void generateIdFilms(Film film) {
         if (film.getId() == 0) {
             film.setId(++id);
-        } else if ((film.getId() > id) || (film.getId() < id)) {
-            film.setId(++id);
         }
     }
 }
