@@ -57,18 +57,14 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int id) {
-        return null;
-    }
-
-    @Override
-    public void deleteFilm(int id) {
-
+        return films.get(id);
     }
 
     @Override
     public Map<Integer, Film> getFilms() {
         return films;
     }
+
     @Override
     public Map<String, LocalDate> getDatabaseOfFilmsForVerification() {
         return databaseOfFilmsForVerification;

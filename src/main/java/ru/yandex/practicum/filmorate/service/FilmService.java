@@ -25,8 +25,7 @@ public class FilmService {
     public Film createFilm(Film film) {
         if (!Objects.isNull(film)) {
             if (filmVerification(film) && filmValidation(film)) {
-                filmStorage.addFilm(film);
-                return film;
+                return filmStorage.addFilm(film);
             } else {
                 log.warn("Добавление нового фильма " + film.getName() + "в хранилище - не выполнен");
                 throw new ValidationException("Фильм " + film.getName() + " не сохранен, он был зарегистрирован ранее");
@@ -37,22 +36,31 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
+        Film filmForStorage = null;
         if (!Objects.isNull(film)) {
             if (filmStorage.getFilms().containsKey(film.getId())) {
                 if (filmValidation(film)) {
-                    filmStorage.updateFilm(film);
+                    filmForStorage = filmStorage.updateFilm(film);
                 }
-                return film;
             } else {
                 throw new ResourceNotFoundException("Фильм " + film.getName() + " не обновлен");
             }
         } else {
             throw new RuntimeException("Ошибка, фильм не задан");
         }
+        return filmForStorage;
     }
 
     public Collection<Film> findAllFilms() {
         return filmStorage.getAllFilm();
+    }
+
+    public Film getFilmById(int id){
+        if (filmStorage.getFilms().containsKey(id)){
+            return filmStorage.getFilmById(id);
+        } else {
+            throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
+        }
     }
 
     private boolean filmValidation(Film film) {
