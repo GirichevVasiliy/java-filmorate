@@ -1,13 +1,25 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.model.Film;
 
-public interface FilmStorage {
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Map;
 
-    Film createFilm(Film film);
+public interface FilmStorage {
+    Collection<Film> getAllFilm();
+
+    Map<Integer, Film> getFilms();
+
+    Map<String, LocalDate> getDatabaseOfFilmsForVerification();
+
+    Film addFilm(Film film);
+
 
     Film updateFilm(Film film);
 
+    Film getFilmById(int id);
+
     void deleteFilm(int id);
 }
+
