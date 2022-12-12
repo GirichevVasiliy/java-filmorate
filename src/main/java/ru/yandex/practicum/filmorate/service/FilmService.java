@@ -90,7 +90,7 @@ public class FilmService {
 
     private boolean filmVerification(Film film) {
         boolean isFilmVerification = true;
-        if (!filmStorage.getAllFilm().isEmpty() && filmStorage.getDatabaseOfFilmsForVerification().isEmpty()) {
+        if (!filmStorage.getAllFilm().isEmpty() && !filmStorage.getDatabaseOfFilmsForVerification().isEmpty()) {
             if (filmStorage.getDatabaseOfFilmsForVerification().containsKey(film.getName()) &&
                     filmStorage.getDatabaseOfFilmsForVerification().containsValue(film.getReleaseDate())) {
                 log.warn("Фильм: " + film.getName() + " зарегистрирован ранее");
