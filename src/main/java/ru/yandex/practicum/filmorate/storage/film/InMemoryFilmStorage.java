@@ -13,15 +13,9 @@ import java.util.TreeMap;
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-
     private final Map<Integer, Film> films = new HashMap<>();
     private final Map<String, LocalDate> databaseOfFilmsForVerification = new TreeMap<>();
     private int id;
-
-    @Override
-    public Collection<Film> getAllFilm() {
-        return films.values();
-    }
 
     @Override
     public Film addFilm(Film film) {
@@ -53,6 +47,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         log.info("Обновление фильма " + film.getName() + " в хранилище - выполнено");
         return film;
+    }
+
+    @Override
+    public Collection<Film> getAllFilm() {
+        return films.values();
     }
 
     @Override

@@ -20,7 +20,7 @@ class UserControllerTest {
 
     @BeforeEach
     void init() {
-        userController = new UserController();
+       // userController = new UserController();
     }
 
     void initUsers() {
