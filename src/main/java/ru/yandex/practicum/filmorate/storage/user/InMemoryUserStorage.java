@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -61,10 +59,12 @@ public class InMemoryUserStorage implements UserStorage {
     public User getUserById(int id) {
         return users.get(id);
     }
+
     @Override
     public Map<Integer, User> getUsers() {
         return users;
     }
+
     @Override
     public Set<String> getEmails() {
         return emails;

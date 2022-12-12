@@ -55,8 +55,8 @@ public class FilmService {
         return filmStorage.getAllFilm();
     }
 
-    public Film getFilmById(int id){
-        if (filmStorage.getFilms().containsKey(id)){
+    public Film getFilmById(int id) {
+        if (filmStorage.getFilms().containsKey(id)) {
             return filmStorage.getFilmById(id);
         } else {
             throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
