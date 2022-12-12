@@ -5,6 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
+
     private UserController userController;
     private User user0;
     private User user1;
@@ -20,7 +23,7 @@ class UserControllerTest {
 
     @BeforeEach
     void init() {
-       // userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
     }
 
     void initUsers() {
@@ -58,8 +61,8 @@ class UserControllerTest {
                 .build();
         userController.createUser(user1);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(user1, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(user1, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
         final User user2 = User.builder()
@@ -70,8 +73,8 @@ class UserControllerTest {
                 .build();
         userController.createUser(user2);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user2), "Пользователь не сохранен"),
-                () -> assertEquals(user2, userController.getUsers().get(user2.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user2), "Пользователь не сохранен"),
+                () -> assertEquals(user2, userController.findUserForId(user2.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -87,8 +90,8 @@ class UserControllerTest {
                 .build();
         userController.createUser(user1);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(user1, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(user1, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
         assertThrows(ValidationException.class, () -> {
@@ -180,8 +183,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -205,8 +208,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -253,19 +256,19 @@ class UserControllerTest {
                 .build();
         userController.updateUser(user2Control);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1Control), "" +
+                () -> assertTrue(userController.findAllUsers().contains(user1Control), "" +
                         "Пользователь не сохранен"),
-                () -> assertEquals(user1Control, userController.getUsers().get(user1Control.getId()),
+                () -> assertEquals(user1Control, userController.findUserForId(user1Control.getId()),
                         "Пользователи не одинаковые")
         );
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user2Control), "" +
+                () -> assertTrue(userController.findAllUsers().contains(user2Control), "" +
                         "Пользователь не сохранен"),
-                () -> assertEquals(user2Control, userController.getUsers().get(user2Control.getId()),
+                () -> assertEquals(user2Control, userController.findUserForId(user2Control.getId()),
                         "Пользователи не одинаковые")
         );
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user0), "" +
+                () -> assertTrue(userController.findAllUsers().contains(user0), "" +
                         "Пользователь не сохранен"),
                 () -> assertEquals(idUser0, user0.getId(), "id не совпал"),
                 () -> assertEquals(user0.getEmail(), "petrov@yandex.ru", "Почта пользователя не совпала"),
@@ -337,8 +340,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -364,8 +367,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }

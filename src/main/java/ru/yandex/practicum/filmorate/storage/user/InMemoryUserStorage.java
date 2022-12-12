@@ -53,13 +53,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getAllUser() {
-        return null;
+    public Collection<User> getAllUser() {
+        return users.values();
     }
 
     @Override
     public User getUserById(int id) {
-        return null;
+        return users.get(id);
     }
     @Override
     public Map<Integer, User> getUsers() {
