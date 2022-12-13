@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -435,24 +434,29 @@ class UserControllerTest {
                         "Пользователь id = " + user2.getId() + " не найден у пользователя " + user0.getId())
         );
     }
+
     @Test
     @DisplayName("Добавление друзей пользователю с одинаковым id")
     void addFriendToUserEqualsId() {
         initUsers();
         assertThrows(ValidationException.class, () -> {
-            userController.addFriendToUser(user0.getId(), user0.getId());;
+            userController.addFriendToUser(user0.getId(), user0.getId());
+            ;
         }, "Тест добавления друзей пользователю с одинаковым id провален");
     }
+
     @Test
     @DisplayName("Добавление друзей пользователю с неверным id")
     void addFriendToUserBadId() {
         initUsers();
         int idBad1 = -1;
         assertThrows(ResourceNotFoundException.class, () -> {
-            userController.addFriendToUser(user0.getId(), idBad1);;
+            userController.addFriendToUser(user0.getId(), idBad1);
+            ;
         }, "Тест создания и валидации повторяющегося пользователя провален");
         assertThrows(ResourceNotFoundException.class, () -> {
-            userController.addFriendToUser(idBad1, user0.getId());;
+            userController.addFriendToUser(idBad1, user0.getId());
+            ;
         }, "Тест добавление друзей пользователю с неверным id провален");
     }
 }
