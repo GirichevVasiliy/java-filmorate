@@ -107,7 +107,17 @@ public class UserService {
         }
         return listOfCommonFriends;
     }
-
+    public void deleteFriendToUser(Integer id, Integer friendId){
+        if (id >= 0 && userStorage.getUsers().containsKey(id)) {
+            if (friendId >= 0 && id != friendId && userStorage.getUsers().containsKey(friendId)){
+               userStorage.getUsers().get(id).getFriends().remove(friendId);
+            } else {
+                throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
+            }
+        } else {
+            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+        }
+    }
 
     private boolean userValidation(User user) {
         boolean isValidation = false;
