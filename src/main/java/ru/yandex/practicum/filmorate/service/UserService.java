@@ -67,11 +67,15 @@ public class UserService {
     }
 
     public void addFriendToUser(Integer id, Integer friendId) {
-        if (id >= 0 && friendId >= 0 && id != friendId && userStorage.getUsers().containsKey(id)) {
-            userStorage.getUsers().get(id).getFriends().add(friendId);
-            userStorage.getUsers().get(friendId).getFriends().add(id);
+        if (!Objects.equals(id, friendId)) {
+            if (id >= 0 && friendId >= 0 && userStorage.getUsers().containsKey(id)) {
+                userStorage.getUsers().get(id).setFriend(friendId);
+                userStorage.getUsers().get(friendId).setFriend(id);
+            } else {
+                throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+            }
         } else {
-            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+            throw new ValidationException("Пользователь не может добавить сам себя в друзья");
         }
     }
 
@@ -79,7 +83,7 @@ public class UserService {
         final Collection<User> allFriends = new ArrayList<>();
         if (id >= 0 && userStorage.getUsers().containsKey(id)) {
             final User user = userStorage.getUsers().get(id);
-            for (Integer idFriend: user.getFriends()) {
+            for (Integer idFriend : user.getFriends()) {
                 allFriends.add(userStorage.getUsers().get(idFriend));
             }
         } else {
@@ -90,32 +94,41 @@ public class UserService {
 
     public Collection<User> findListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         final Collection<User> listOfCommonFriends = new ArrayList<>();
-        if (id >= 0 && userStorage.getUsers().containsKey(id)) {
-            if (otherId >= 0 && id != otherId && userStorage.getUsers().containsKey(otherId)){
-                final User user1 = userStorage.getUsers().get(id);
-                final User user2 = userStorage.getUsers().get(otherId);
-                for (Integer idFriend : user1.getFriends()) {
-                    if (user2.getFriends().contains(idFriend)){
-                        listOfCommonFriends.add(userStorage.getUsers().get(idFriend));
+        if (!Objects.equals(id, otherId)) {
+            if (id >= 0 && userStorage.getUsers().containsKey(id)) {
+                if (otherId >= 0 && userStorage.getUsers().containsKey(otherId)) {
+                    final User user1 = userStorage.getUsers().get(id);
+                    final User user2 = userStorage.getUsers().get(otherId);
+                    for (Integer idFriend : user1.getFriends()) {
+                        if (user2.getFriends().contains(idFriend)) {
+                            listOfCommonFriends.add(userStorage.getUsers().get(idFriend));
+                        }
                     }
+                } else {
+                    throw new ResourceNotFoundException("Пользователь c ID: " + otherId + " не найден");
                 }
             } else {
-                throw new ResourceNotFoundException("Пользователь c ID: " + otherId + " не найден");
+                throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
             }
         } else {
-            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+            throw new ValidationException("Пользователь не может быть сам себе другом");
         }
         return listOfCommonFriends;
     }
-    public void deleteFriendToUser(Integer id, Integer friendId){
-        if (id >= 0 && userStorage.getUsers().containsKey(id)) {
-            if (friendId >= 0 && id != friendId && userStorage.getUsers().containsKey(friendId)){
-               userStorage.getUsers().get(id).getFriends().remove(friendId);
+
+    public void deleteFriendToUser(Integer id, Integer friendId) {
+        if (!Objects.equals(id, friendId)) {
+            if (id >= 0 && userStorage.getUsers().containsKey(id)) {
+                if (friendId >= 0 && id != friendId && userStorage.getUsers().containsKey(friendId)) {
+                    userStorage.getUsers().get(id).getFriends().remove(friendId);
+                } else {
+                    throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
+                }
             } else {
-                throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
+                throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
             }
         } else {
-            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+            throw new ValidationException("Пользователь не удалить себя из своего списка друзей");
         }
     }
 

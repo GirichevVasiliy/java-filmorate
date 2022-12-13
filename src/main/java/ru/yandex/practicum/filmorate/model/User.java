@@ -4,7 +4,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -18,5 +20,12 @@ public class User {
     private String name;
     @NonNull
     private LocalDate birthday;
-    private Set<Integer> friends;
+    private final Set<Integer> friends = new HashSet<>();
+    public void setFriend(Integer idFriends) {
+        this.friends.add(idFriends);
+    }
+
+    public Set<Integer> getFriends() {
+        return this.friends;
+    }
 }

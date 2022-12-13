@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -419,5 +421,38 @@ class UserControllerTest {
                 () -> assertTrue(listOfAllUsers.contains(user1), "Пользователь id = 1 не найден"),
                 () -> assertTrue(listOfAllUsers.contains(user2), "Пользователь id = 2 не найден")
         );
+    }
+
+    @Test
+    @DisplayName("Добавление друзей пользователю")
+    void addFriendToUser() {
+        initUsers();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        assertAll(
+                () -> assertTrue(userController.findUserForId(user0.getId()).getFriends().contains(user1.getId()),
+                        "Пользователь id = " + user1.getId() + " не найден у пользователя " + user0.getId()),
+                () -> assertTrue(userController.findUserForId(user1.getId()).getFriends().contains(user0.getId()),
+                        "Пользователь id = " + user2.getId() + " не найден у пользователя " + user0.getId())
+        );
+    }
+    @Test
+    @DisplayName("Добавление друзей пользователю с одинаковым id")
+    void addFriendToUserEqualsId() {
+        initUsers();
+        assertThrows(ValidationException.class, () -> {
+            userController.addFriendToUser(user0.getId(), user0.getId());;
+        }, "Тест добавления друзей пользователю с одинаковым id провален");
+    }
+    @Test
+    @DisplayName("Добавление друзей пользователю с неверным id")
+    void addFriendToUserBadId() {
+        initUsers();
+        int idBad1 = -1;
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.addFriendToUser(user0.getId(), idBad1);;
+        }, "Тест создания и валидации повторяющегося пользователя провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.addFriendToUser(idBad1, user0.getId());;
+        }, "Тест добавление друзей пользователю с неверным id провален");
     }
 }

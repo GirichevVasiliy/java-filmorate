@@ -26,17 +26,14 @@ public class UserController {
     }
 
     //**************** PUT************************//
-
     @PutMapping
     public User updateUser(@RequestBody User user) {
         return userService.updateUser(user);
     }
-    @PutMapping("{id}/friends/{friendId}")
+    @PutMapping("/{id}/friends/{friendId}")
     public void addFriendToUser(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.addFriendToUser(id, friendId);
     }
-
-
 
     //**************** GET************************//
     @GetMapping
@@ -56,15 +53,14 @@ public class UserController {
     }
 
     //список друзей, общих с другим пользователем.
-    @GetMapping("/users/{id}/friends/common/{otherId}")
+    @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> findListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.findListOfCommonFriends(id, otherId);
     }
 
-
     //**************** DELETE ************************//
     //удаление из друзей
-    @DeleteMapping("{id}/friends/{friendId}")
+    @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriendToUser(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.deleteFriendToUser(id, friendId);
     }
