@@ -3,12 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -17,7 +19,7 @@ import java.util.Objects;
 public class UserService {
     private final UserStorage userStorage;
 
-@Autowired
+    @Autowired
     public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
     }
@@ -25,7 +27,7 @@ public class UserService {
     public User createUser(User newUser) {
         if (!Objects.isNull(newUser)) {
             if (userVerification(newUser) && userValidation(newUser)) {
-              return userStorage.addUser(newUser);
+                return userStorage.addUser(newUser);
             } else {
                 log.warn("Получен запрос к эндпоинту: Создания пользователя - не выполнен");
                 throw new ValidationException("Пользователь " + newUser.getEmail() +
@@ -56,13 +58,56 @@ public class UserService {
         return userStorage.getAllUser();
     }
 
-    public User getUserById(int id){
-        if (userStorage.getUsers().containsKey(id)){
+    public User getUserById(Integer id) {
+        if (userStorage.getUsers().containsKey(id) && id >= 0) {
             return userStorage.getUserById(id);
         } else {
-            throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
+            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
         }
     }
+
+    public void addFriendToUser(Integer id, Integer friendId) {
+        if (id >= 0 && friendId >= 0 && id != friendId && userStorage.getUsers().containsKey(id)) {
+            userStorage.getUsers().get(id).getFriends().add(friendId);
+            userStorage.getUsers().get(friendId).getFriends().add(id);
+        } else {
+            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+        }
+    }
+
+    public Collection<User> findAllFriendsToUser(@PathVariable Integer id) {
+        final Collection<User> allFriends = new ArrayList<>();
+        if (id >= 0 && userStorage.getUsers().containsKey(id)) {
+            final User user = userStorage.getUsers().get(id);
+            for (Integer idFriend: user.getFriends()) {
+                allFriends.add(userStorage.getUsers().get(idFriend));
+            }
+        } else {
+            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+        }
+        return allFriends;
+    }
+
+    public Collection<User> findListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        final Collection<User> listOfCommonFriends = new ArrayList<>();
+        if (id >= 0 && userStorage.getUsers().containsKey(id)) {
+            if (otherId >= 0 && id != otherId && userStorage.getUsers().containsKey(otherId)){
+                final User user1 = userStorage.getUsers().get(id);
+                final User user2 = userStorage.getUsers().get(otherId);
+                for (Integer idFriend : user1.getFriends()) {
+                    if (user2.getFriends().contains(idFriend)){
+                        listOfCommonFriends.add(userStorage.getUsers().get(idFriend));
+                    }
+                }
+            } else {
+                throw new ResourceNotFoundException("Пользователь c ID: " + otherId + " не найден");
+            }
+        } else {
+            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
+        }
+        return listOfCommonFriends;
+    }
+
 
     private boolean userValidation(User user) {
         boolean isValidation = false;
