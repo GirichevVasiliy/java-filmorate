@@ -22,6 +22,9 @@ class UserControllerTest {
     private User user0;
     private User user1;
     private User user2;
+    private User user3;
+    private User user4;
+    private User user5;
 
     @BeforeEach
     void init() {
@@ -50,6 +53,30 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1989-01-01"))
                 .build();
         userController.createUser(user2);
+    }
+
+    void initUsersForCommonFriend() {
+        user3 = User.builder()
+                .email("sidorov@yandex.ru")
+                .login("VovaSidorov")
+                .name("Sidorov Vova")
+                .birthday(LocalDate.parse("1966-03-02"))
+                .build();
+        userController.createUser(user3);
+        user4 = User.builder()
+                .email("fofanov@yandex.ru")
+                .login("IvanFofanov")
+                .name("Ivan Fofanov")
+                .birthday(LocalDate.parse("1933-09-01"))
+                .build();
+        userController.createUser(user4);
+        user5 = User.builder()
+                .email("Golovin@yandex.ru")
+                .login("VladGolovin")
+                .name("Vlad Golovin")
+                .birthday(LocalDate.parse("1999-06-01"))
+                .build();
+        userController.createUser(user5);
     }
 
     @Test
@@ -422,23 +449,26 @@ class UserControllerTest {
                 () -> assertTrue(listOfAllUsers.contains(user2), "Пользователь id = 2 не найден")
         );
     }
+
     @Test
     @DisplayName("Поиск пользователя по id")
-    void getUserByIdTest(){
+    void getUserByIdTest() {
         initUsers();
         final int idUserForSearch = 1;
         User userSearch = userController.findUserForId(idUserForSearch);
         assertEquals(userSearch, user0, "Тест поиска пользователя по id провален");
     }
+
     @Test
     @DisplayName("Поиск пользователя по id")
-    void getUserByBadIdTest(){
+    void getUserByBadIdTest() {
         initUsers();
         final int idUserForSearch = 99999;
         assertThrows(ResourceNotFoundException.class, () -> {
             userController.findUserForId(idUserForSearch);
         }, "Тест поиска пользователя по id провален");
     }
+
     @Test
     @DisplayName("Добавление друзей пользователю")
     void addFriendToUserTest() {
@@ -468,27 +498,133 @@ class UserControllerTest {
         int idBad1 = -1;
         assertThrows(ResourceNotFoundException.class, () -> {
             userController.addFriendToUser(user0.getId(), idBad1);
-            ;
         }, "Тест создания и валидации повторяющегося пользователя провален");
         assertThrows(ResourceNotFoundException.class, () -> {
             userController.addFriendToUser(idBad1, user0.getId());
-            ;
         }, "Тест добавление друзей пользователю с неверным id провален");
     }
+
     @Test
     @DisplayName("Получение всего списка друзей пользователя")
-    void findAllFriendsToUserTest(){
+    void findAllFriendsToUserTest() {
         initUsers();
         userController.addFriendToUser(user0.getId(), user1.getId());
         userController.addFriendToUser(user0.getId(), user2.getId());
-        Collection<User> idFriendList = userController.findAllFriendsToUser(user0.getId());
+        Collection<User> idFriendListUser0 = userController.findAllFriendsToUser(user0.getId());
         assertAll(
-                () -> assertTrue(idFriendList.contains(user1),
+                () -> assertTrue(idFriendListUser0.contains(user1),
                         "Пользователь id = " + user1.getId() + " не найден в списке друзей у пользователя "
                                 + user0.getId()),
-                () -> assertTrue(idFriendList.contains(user2),
+                () -> assertTrue(idFriendListUser0.contains(user2),
                         "Пользователь id = " + user2.getId() + " не найден в списке друзей у пользователя "
                                 + user0.getId())
         );
+        userController.addFriendToUser(user1.getId(), user0.getId());
+        userController.addFriendToUser(user1.getId(), user2.getId());
+        Collection<User> idFriendListUser1 = userController.findAllFriendsToUser(user1.getId());
+        assertAll(
+                () -> assertTrue(idFriendListUser1.contains(user0),
+                        "Пользователь id = " + user1.getId() + " не найден в списке друзей у пользователя "
+                                + user0.getId()),
+                () -> assertTrue(idFriendListUser1.contains(user2),
+                        "Пользователь id = " + user2.getId() + " не найден в списке друзей у пользователя "
+                                + user0.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("Получение всего списка друзей пользователя c неверным id")
+    void findAllFriendsToUserBadIdFriendTest() {
+        initUsers();
+        int idBad1 = -1;
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findAllFriendsToUser(idBad1);
+        }, "Получение всего списка друзей пользователя c неверным id провален");
+    }
+
+    @Test
+    @DisplayName("Получение всего списка одинаковых друзей пользователей")
+    void findListOfCommonFriendsTest() {
+    initUsers();
+    initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        Collection<User> commonUser = userController.findListOfCommonFriends(user0.getId(), user1.getId());
+        assertAll(
+                () -> assertTrue(commonUser.contains(user3),
+                        "У пользователя id = " + user0.getId() + " не найден общий друг " + user3.getId()
+                                + "с пользователем " + user1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("Получение всего списка одинаковых друзей пользователей")
+    void findListOfCommonFriendsBadIdTest() {
+        int idBad1 = -1;
+        initUsers();
+        initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findListOfCommonFriends(user0.getId(),idBad1);
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findListOfCommonFriends(idBad1, user0.getId());
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findListOfCommonFriends(idBad1, user0.getId());
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+        assertThrows(ValidationException.class, () -> {
+            userController.findListOfCommonFriends(idBad1, idBad1);
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+    }
+    @Test
+    @DisplayName("Удаление друга пользователя по ID")
+    void deleteFriendToUserForIdTest(){
+        initUsers();
+        initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        userController.deleteFriendToUser(user0.getId(), user1.getId());
+        Collection<User> idFriendListUser0 = userController.findAllFriendsToUser(user0.getId());
+        assertAll(
+                () -> assertFalse(idFriendListUser0.contains(user1),
+                        "У пользователя id = " + user0.getId() + " найден друг " + user1.getId())
+        );
+        userController.deleteFriendToUser(user0.getId(), user2.getId());
+        Collection<User> idFriendListUser00 = userController.findAllFriendsToUser(user0.getId());
+        assertAll(
+                () -> assertFalse(idFriendListUser00.contains(user2),
+                        "У пользователя id = " + user0.getId() + " найден друг " + user2.getId())
+        );
+    }
+    @Test
+    @DisplayName("Удаление друга пользователя по неверному ID")
+    void deleteFriendToUserForBadIdTest(){
+        int idBad1 = -1;
+        initUsers();
+        initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        userController.deleteFriendToUser(user0.getId(), user1.getId());
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.deleteFriendToUser(user0.getId(),idBad1);
+        }, "Тест удаления друга пользователя по неверному ID провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.deleteFriendToUser(idBad1, user0.getId());
+        }, "Тест удаления друга пользователя по неверному ID провален");
+              assertThrows(ValidationException.class, () -> {
+            userController.deleteFriendToUser(idBad1, idBad1);
+        }, "Тест удаления друга пользователя по неверному ID провален");
     }
 }

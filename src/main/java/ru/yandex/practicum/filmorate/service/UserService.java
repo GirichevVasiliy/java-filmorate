@@ -133,7 +133,7 @@ public class UserService {
                 throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
             }
         } else {
-            throw new ValidationException("Пользователь не удалить себя из своего списка друзей");
+            throw new ValidationException("Пользователь не может удалить себя из своего списка друзей");
         }
     }
 
