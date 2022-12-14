@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -34,7 +35,7 @@ public class UserService {
                         " не сохранен, такой Email уже зарегистрирован");
             }
         } else {
-            throw new RuntimeException("Ошибка, пользователь не задан");
+            throw new ResourceNotFoundException("Ошибка, пользователь не задан");
         }
     }
 
@@ -49,7 +50,7 @@ public class UserService {
                 throw new ResourceNotFoundException("Пользователь не обновлен");
             }
         } else {
-            throw new RuntimeException("Ошибка, пользователь не задан");
+            throw new UserException("Ошибка, пользователь не задан");
         }
         return userForStorage;
     }
@@ -68,9 +69,13 @@ public class UserService {
 
     public void addFriendToUser(Integer id, Integer friendId) {
         if (!Objects.equals(id, friendId)) {
-            if (id >= 0 && friendId >= 0 && userStorage.getUsers().containsKey(id)) {
-                userStorage.getUsers().get(id).setFriend(friendId);
-                userStorage.getUsers().get(friendId).setFriend(id);
+            if (id >= 0 && userStorage.getUsers().containsKey(id)) {
+                if (friendId >= 0 && userStorage.getUsers().containsKey(friendId)){
+                    userStorage.getUsers().get(id).setFriend(friendId);
+                    userStorage.getUsers().get(friendId).setFriend(id);
+                } else {
+                    throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
+                }
             } else {
                 throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
             }
@@ -119,7 +124,7 @@ public class UserService {
     public void deleteFriendToUser(Integer id, Integer friendId) {
         if (!Objects.equals(id, friendId)) {
             if (id >= 0 && userStorage.getUsers().containsKey(id)) {
-                if (friendId >= 0 && id != friendId && userStorage.getUsers().containsKey(friendId)) {
+                if (friendId >= 0 && userStorage.getUsers().containsKey(friendId)) {
                     userStorage.getUsers().get(id).getFriends().remove(friendId);
                 } else {
                     throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
