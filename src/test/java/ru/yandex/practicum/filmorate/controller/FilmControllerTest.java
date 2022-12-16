@@ -3,11 +3,14 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,13 +21,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmControllerTest {
 
     private FilmController filmController;
+    private UserStorage userStorage;
     private Film film0;
     private Film film1;
     private Film film2;
+    private User user0;
 
     @BeforeEach
     void init() {
-        filmController = new FilmController(new FilmService((new InMemoryFilmStorage()), (new InMemoryUserStorage())));
+        userStorage = new InMemoryUserStorage();
+        filmController = new FilmController(new FilmService((new InMemoryFilmStorage()), (userStorage)));
     }
 
     void initFilms() {
@@ -50,7 +56,8 @@ class FilmControllerTest {
                 .build();
         filmController.createFilm(film2);
     }
-    void initSetLikes(){
+
+    void initSetLikes() {
         for (int i = 0; i < 10; i++) {
             film2.setLikes(i);
             if (i < 5) {
@@ -60,6 +67,15 @@ class FilmControllerTest {
                 film0.setLikes(i);
             }
         }
+    }
+
+    void initUsers() {
+        user0 = User.builder()
+                .email("petrov@yandex.ru")
+                .login("Petr")
+                .name("Stanislav Petrov")
+                .birthday(LocalDate.parse("1961-05-21"))
+                .build();
     }
 
     @Test
@@ -114,7 +130,6 @@ class FilmControllerTest {
             );
         }
     }
-
 
     @Test
     @DisplayName("Тест создания и валидации фильма максимальная длина описания более 200 символов")
@@ -395,7 +410,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Получение списка всех фильмов")
-    void findAllFilms() {
+    void findAllFilmsTest() {
         final int size = 3;
         initFilms();
         List<Film> listOfAllFilm = new ArrayList<>(filmController.findAllFilms());
@@ -408,25 +423,28 @@ class FilmControllerTest {
         );
     }
 
+    @Test
+    @DisplayName("Получение фильма по ID")
+    void findFilmsForIdTest() {
+        initFilms();
+        final int id = 1;
+        Film filmSearch = filmController.findFilmsForId(id);
+        assertEquals(filmSearch, film0, "Фильмы не совпали");
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @Test
+    @DisplayName("Получение фильма по неверному ID")
+    void findFilmsForBadIdTest() {
+        initFilms();
+        final int id = -1;
+        assertThrows(ResourceNotFoundException.class, () -> {
+            filmController.findFilmsForId(id);
+        }, "Получение фильма c неверным id провален");
+    }
 
     @Test
     @DisplayName("Получение списка всех фильмов с максимальными лайками")
-    void findTopTenMostLikesFilms() {
+    void findTopTenMostLikesFilmsTest() {
         final int ratingFilm0 = 2;
         final int ratingFilm1 = 1;
         final int ratingFilm2 = 0;
@@ -442,9 +460,10 @@ class FilmControllerTest {
 
         );
     }
+
     @Test
     @DisplayName("Получение списка одного фильма с максимальными лайками")
-    void findTopTenMostLikesFilmsCountEqualsOne() {
+    void findTopTenMostLikesFilmsCountEqualsOneTest() {
         final int ratingFilm2 = 0;
         final int count = 1;
         initFilms();
@@ -458,9 +477,10 @@ class FilmControllerTest {
 
         );
     }
+
     @Test
     @DisplayName("Получение списка всех фильмов с максимальными лайками и отриц. count")
-    void findTopTenMostLikesFilmsCountEqualsMinusOne() {
+    void findTopTenMostLikesFilmsCountEqualsMinusOneTest() {
         final int ratingFilm0 = 2;
         final int ratingFilm1 = 1;
         final int ratingFilm2 = 0;
@@ -476,9 +496,10 @@ class FilmControllerTest {
 
         );
     }
+
     @Test
     @DisplayName("Получение списка всех фильмов с максимальными лайками count = null")
-    void findTopTenMostLikesFilmsCountEqualsNull() {
+    void findTopTenMostLikesFilmsCountEqualsNullTest() {
         final int ratingFilm0 = 2;
         final int ratingFilm1 = 1;
         final int ratingFilm2 = 0;
@@ -492,5 +513,50 @@ class FilmControllerTest {
                 () -> assertEquals(films.get(ratingFilm0), film0, "Ошибка рейтинга фильмов")
 
         );
+    }
+
+    @Test
+    @DisplayName("Удаление лайка у фильма")
+    void deleteLikeFilmTest() {
+        initFilms();
+        initUsers();
+        userStorage.addUser(user0);
+        initSetLikes();
+        final int id = film0.getId();
+        final int userId = 1;
+        final int countLikeSize = 3;
+        final int countLikeSizeAfterDelete = 2;
+        assertEquals(filmController.findFilmsForId(id).getCountLikes(), countLikeSize);
+        filmController.deleteLikeFilm(id, userId);
+        assertEquals(filmController.findFilmsForId(id).getCountLikes(), countLikeSizeAfterDelete, "Лайк не удален");
+        assertFalse(filmController.findFilmsForId(id).getLikes().contains(userId), "Лайк не удален");
+    }
+
+    @Test
+    @DisplayName("Удаление лайка у фильма с неверным id")
+    void deleteLikeFilmBadIdFilmTest() {
+        initFilms();
+        initUsers();
+        userStorage.addUser(user0);
+        initSetLikes();
+        final int id = -1;
+        final int userId = 1;
+        assertThrows(ResourceNotFoundException.class, () -> {
+            filmController.deleteLikeFilm(id, userId);
+        }, "Получение фильма c неверным id провален");
+    }
+
+    @Test
+    @DisplayName("Удаление лайка у фильма с неверным id пользователя")
+    void deleteLikeFilmBadIdUserTest() {
+        initFilms();
+        initUsers();
+        userStorage.addUser(user0);
+        initSetLikes();
+        final int id = 1;
+        final int userId = -1;
+        assertThrows(ResourceNotFoundException.class, () -> {
+            filmController.deleteLikeFilm(id, userId);
+        }, "Получение фильма c неверным id провален");
     }
 }
