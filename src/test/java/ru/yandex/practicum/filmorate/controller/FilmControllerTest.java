@@ -50,6 +50,17 @@ class FilmControllerTest {
                 .build();
         filmController.createFilm(film2);
     }
+    void initSetLikes(){
+        for (int i = 0; i < 10; i++) {
+            film2.setLikes(i);
+            if (i < 5) {
+                film1.setLikes(i);
+            }
+            if (i < 3) {
+                film0.setLikes(i);
+            }
+        }
+    }
 
     @Test
     @DisplayName("Стандартный тест создания и валидации фильма")
@@ -397,24 +408,89 @@ class FilmControllerTest {
         );
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     @Test
     @DisplayName("Получение списка всех фильмов с максимальными лайками")
     void findTopTenMostLikesFilms() {
+        final int ratingFilm0 = 2;
+        final int ratingFilm1 = 1;
+        final int ratingFilm2 = 0;
+        final int count = 5;
         initFilms();
-        film2.setLikes(1);
-        film2.setLikes(2);
-        film2.setLikes(3);
-        film2.setLikes(4);
-        film2.setLikes(5);
+        initSetLikes();
+        List<Film> films = new ArrayList<>();
+        films.addAll(filmController.findTopTenMostLikesFilms(count));
+        assertAll(
+                () -> assertEquals(films.get(ratingFilm2), film2, "Ошибка рейтинга фильмов"),
+                () -> assertEquals(films.get(ratingFilm1), film1, "Ошибка рейтинга фильмов"),
+                () -> assertEquals(films.get(ratingFilm0), film0, "Ошибка рейтинга фильмов")
 
-        film1.setLikes(1);
-        film1.setLikes(2);
-        film1.setLikes(3);
+        );
+    }
+    @Test
+    @DisplayName("Получение списка одного фильма с максимальными лайками")
+    void findTopTenMostLikesFilmsCountEqualsOne() {
+        final int ratingFilm2 = 0;
+        final int count = 1;
+        initFilms();
+        initSetLikes();
+        List<Film> films = new ArrayList<>();
+        films.addAll(filmController.findTopTenMostLikesFilms(count));
+        assertAll(
+                () -> assertEquals(films.get(ratingFilm2), film2, "Ошибка рейтинга фильмов"),
+                () -> assertFalse(films.contains(film1), "Фильтрация фильмов не работает"),
+                () -> assertFalse(films.contains(film0), "Фильтрация фильмов не работает")
 
-        film0.setLikes(1);
-        film0.setLikes(2);
-        List <Film> films = new ArrayList<>();
-        films.addAll(filmController.findTopTenMostLikesFilms(10));
-        System.out.println(films.toString());
-        }
+        );
+    }
+    @Test
+    @DisplayName("Получение списка всех фильмов с максимальными лайками и отриц. count")
+    void findTopTenMostLikesFilmsCountEqualsMinusOne() {
+        final int ratingFilm0 = 2;
+        final int ratingFilm1 = 1;
+        final int ratingFilm2 = 0;
+        final int count = -1;
+        initFilms();
+        initSetLikes();
+        List<Film> films = new ArrayList<>();
+        films.addAll(filmController.findTopTenMostLikesFilms(count));
+        assertAll(
+                () -> assertEquals(films.get(ratingFilm2), film2, "Ошибка рейтинга фильмов"),
+                () -> assertEquals(films.get(ratingFilm1), film1, "Ошибка рейтинга фильмов"),
+                () -> assertEquals(films.get(ratingFilm0), film0, "Ошибка рейтинга фильмов")
+
+        );
+    }
+    @Test
+    @DisplayName("Получение списка всех фильмов с максимальными лайками count = null")
+    void findTopTenMostLikesFilmsCountEqualsNull() {
+        final int ratingFilm0 = 2;
+        final int ratingFilm1 = 1;
+        final int ratingFilm2 = 0;
+        initFilms();
+        initSetLikes();
+        List<Film> films = new ArrayList<>();
+        films.addAll(filmController.findTopTenMostLikesFilms(null));
+        assertAll(
+                () -> assertEquals(films.get(ratingFilm2), film2, "Ошибка рейтинга фильмов"),
+                () -> assertEquals(films.get(ratingFilm1), film1, "Ошибка рейтинга фильмов"),
+                () -> assertEquals(films.get(ratingFilm0), film0, "Ошибка рейтинга фильмов")
+
+        );
+    }
 }

@@ -30,6 +30,7 @@ public class FilmService {
     public Film createFilm(Film film) {
         if (!Objects.isNull(film)) {
             if (filmVerification(film) && filmValidation(film)) {
+                log.info("Добавлен новый фильм" + film.getName());
                 return filmStorage.addFilm(film);
             } else {
                 log.warn("Добавление нового фильма " + film.getName() + "в хранилище - не выполнен");
@@ -46,8 +47,10 @@ public class FilmService {
             if (filmStorage.getFilms().containsKey(film.getId())) {
                 if (filmValidation(film)) {
                     filmForStorage = filmStorage.updateFilm(film);
+                    log.info("Фильм " + film.getName() + " успешно обновлен");
                 }
             } else {
+                log.warn("Обновление фильма " + film.getName() + "не выполнено");
                 throw new ResourceNotFoundException("Фильм " + film.getName() + " не обновлен");
             }
         } else {
@@ -57,13 +60,16 @@ public class FilmService {
     }
 
     public Collection<Film> findAllFilms() {
+        log.info("Запущен метод получения всех фильмов");
         return filmStorage.getAllFilm();
     }
 
     public Film getFilmById(int id) {
         if (filmStorage.getFilms().containsKey(id)) {
+            log.info("Поиск фильма по ID = " + id);
             return filmStorage.getFilmById(id);
         } else {
+            log.warn("Фильм c ID: " + id + " не найден");
             throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
         }
     }
@@ -72,10 +78,13 @@ public class FilmService {
         if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
             if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
                 filmStorage.getFilms().get(id).setLikes(userId);
+                log.info("Добавлен лайк фильму ID = " + id + " пользователем с ID = " + userId);
             } else {
+                log.warn("Пользователь c ID: " + userId + " не найден");
                 throw new ResourceNotFoundException("Пользователь c ID: " + userId + " не найден");
             }
         } else {
+            log.warn("Фильм c ID: " + id + " не найден");
             throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
         }
     }
@@ -84,10 +93,13 @@ public class FilmService {
         if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
             if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
                 filmStorage.getFilms().get(id).getLikes().remove(userId);
+                log.info("Удален лайк у фильма ID = " + id + " пользователем с ID = " + userId);
             } else {
+                log.warn("Пользователь c ID: " + userId + " не найден");
                 throw new ResourceNotFoundException("Пользователь c ID: " + userId + " не найден");
             }
         } else {
+            log.warn("Фильм c ID: " + id + " не найден");
             throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
         }
     }

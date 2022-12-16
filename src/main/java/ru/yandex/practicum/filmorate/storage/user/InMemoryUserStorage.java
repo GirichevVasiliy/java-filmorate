@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -18,34 +19,42 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        generateIdUser(user);
-        users.put(user.getId(), user);
-        emails.add(user.getEmail());
-        log.info("Получен запрос к эндпоинту: Создания пользователя - выполнено успешно");
+        if (!Objects.isNull(user)) {
+            generateIdUser(user);
+            users.put(user.getId(), user);
+            emails.add(user.getEmail());
+            log.info("Получен запрос к эндпоинту: Создания пользователя - выполнено успешно");
+        } else {
+            throw new ErrorServer("Пользователь  не сохранен, ошибка сервера");
+        }
         return user;
     }
 
     @Override
     public User updateUser(User user) {
-        final User savedUser = users.get(user.getId());
-        if (!(savedUser.getEmail().equals(user.getEmail()))) {
-            final String email = user.getEmail();
-            savedUser.setEmail(email);
-        }
-        if (!(savedUser.getLogin().equals(user.getLogin()))) {
-            final String login = user.getLogin();
-            savedUser.setLogin(login);
-        }
-        if (Objects.isNull(user.getName())) {
-            user.setName(user.getLogin());
-        }
-        if (!(savedUser.getName().equals(user.getName()))) {
-            final String name = user.getName();
-            savedUser.setName(name);
-        }
-        if (!(savedUser.getBirthday().equals(user.getBirthday()))) {
-            final LocalDate birthday = user.getBirthday();
-            savedUser.setBirthday(birthday);
+        if (!Objects.isNull(user)) {
+            final User savedUser = users.get(user.getId());
+            if (!(savedUser.getEmail().equals(user.getEmail()))) {
+                final String email = user.getEmail();
+                savedUser.setEmail(email);
+            }
+            if (!(savedUser.getLogin().equals(user.getLogin()))) {
+                final String login = user.getLogin();
+                savedUser.setLogin(login);
+            }
+            if (Objects.isNull(user.getName())) {
+                user.setName(user.getLogin());
+            }
+            if (!(savedUser.getName().equals(user.getName()))) {
+                final String name = user.getName();
+                savedUser.setName(name);
+            }
+            if (!(savedUser.getBirthday().equals(user.getBirthday()))) {
+                final LocalDate birthday = user.getBirthday();
+                savedUser.setBirthday(birthday);
+            }
+        } else {
+            throw new ErrorServer("Пользователь  не обновлен, ошибка сервера");
         }
         return user;
     }

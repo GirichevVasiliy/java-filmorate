@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/films")
@@ -31,7 +32,6 @@ public class FilmController {
         return film;
     }
 
-    // пользователь ставит лайк фильму
     @PutMapping("/{id}/like/{userId}")
     public void addLikeFilm(@PathVariable Integer id, @PathVariable Integer userId) {
         filmService.addLikeFilm(id, userId);
@@ -42,31 +42,23 @@ public class FilmController {
     public Collection<Film> findAllFilms() {
         return filmService.findAllFilms();
     }
+
     @GetMapping("/{id}")
     public Film findFilmsForId(@PathVariable int id) {
         return filmService.getFilmById(id);
     }
-    //возвращает список из первых count фильмов по количеству лайков
+
     @GetMapping("/popular")
-    public Collection<Film> findTopTenMostLikesFilms(@RequestParam Integer count) {
+    public Collection<Film> findTopTenMostLikesFilms(@RequestParam(required = false) Integer count) {
+        if (Objects.isNull(count) || count < 0) {
+            count = 10;
+        }
         return filmService.findTopTenMostLikesFilms(count);
     }
-    //**************** DELETE ************************//
 
-    // пользователь удаляет лайк.
+    //**************** DELETE ************************//
     @DeleteMapping("{id}/like/{userId}")
-    public void deleteLikeFilm (@PathVariable Integer id, @PathVariable Integer userId) {
+    public void deleteLikeFilm(@PathVariable Integer id, @PathVariable Integer userId) {
         filmService.deleteLikeFilm(id, userId);
     }
-
-
-
-
-
-/*
-
-
-            GET /films/popular?count={count} — возвращает список из первых count фильмов по количеству лайков.
-    Если значение параметра count не задано, верните первые 10.*/
-
 }

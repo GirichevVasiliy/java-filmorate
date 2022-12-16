@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -19,33 +17,41 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        generateIdFilms(film);
-        films.put(film.getId(), film);
-        databaseOfFilmsForVerification.put(film.getName(), film.getReleaseDate());
-        log.info("Добавление нового фильма " + film.getName() + " в хранилище - выполнено");
+        if (!Objects.isNull(film)) {
+            generateIdFilms(film);
+            films.put(film.getId(), film);
+            databaseOfFilmsForVerification.put(film.getName(), film.getReleaseDate());
+            log.info("Добавление нового фильма " + film.getName() + " в хранилище - выполнено");
+        } else {
+            throw new ErrorServer("Фильм не сохранен, ошибка сервера");
+        }
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
-        final Film savedFilm = films.get(film.getId());
-        if (!(savedFilm.getName().equals(film.getName()))) {
-            final String name = film.getName();
-            savedFilm.setName(name);
+        if (!Objects.isNull(film)) {
+            final Film savedFilm = films.get(film.getId());
+            if (!(savedFilm.getName().equals(film.getName()))) {
+                final String name = film.getName();
+                savedFilm.setName(name);
+            }
+            if (!(savedFilm.getDescription().equals(film.getDescription()))) {
+                final String description = film.getDescription();
+                savedFilm.setDescription(description);
+            }
+            if (!(savedFilm.getReleaseDate().equals(film.getReleaseDate()))) {
+                final LocalDate releaseDate = film.getReleaseDate();
+                savedFilm.setReleaseDate(releaseDate);
+            }
+            if (!(savedFilm.getDuration() == (film.getDuration()))) {
+                final int duration = film.getDuration();
+                savedFilm.setDuration(duration);
+            }
+            log.info("Обновление фильма " + film.getName() + " в хранилище - выполнено");
+        } else {
+            throw new ErrorServer("Фильм не обновлен, ошибка сервера");
         }
-        if (!(savedFilm.getDescription().equals(film.getDescription()))) {
-            final String description = film.getDescription();
-            savedFilm.setDescription(description);
-        }
-        if (!(savedFilm.getReleaseDate().equals(film.getReleaseDate()))) {
-            final LocalDate releaseDate = film.getReleaseDate();
-            savedFilm.setReleaseDate(releaseDate);
-        }
-        if (!(savedFilm.getDuration() == (film.getDuration()))) {
-            final int duration = film.getDuration();
-            savedFilm.setDuration(duration);
-        }
-        log.info("Обновление фильма " + film.getName() + " в хранилище - выполнено");
         return film;
     }
 
