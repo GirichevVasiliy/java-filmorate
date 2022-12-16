@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ class FilmControllerTest {
 
     @BeforeEach
     void init() {
-        filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
+        filmController = new FilmController(new FilmService((new InMemoryFilmStorage()), (new InMemoryUserStorage())));
     }
 
     void initFilms() {
@@ -395,4 +396,25 @@ class FilmControllerTest {
                 () -> assertTrue(listOfAllFilm.contains(film2), "Фильм с id = 2 не найден")
         );
     }
+
+    @Test
+    @DisplayName("Получение списка всех фильмов с максимальными лайками")
+    void findTopTenMostLikesFilms() {
+        initFilms();
+        film2.setLikes(1);
+        film2.setLikes(2);
+        film2.setLikes(3);
+        film2.setLikes(4);
+        film2.setLikes(5);
+
+        film1.setLikes(1);
+        film1.setLikes(2);
+        film1.setLikes(3);
+
+        film0.setLikes(1);
+        film0.setLikes(2);
+        List <Film> films = new ArrayList<>();
+        films.addAll(filmController.findTopTenMostLikesFilms(10));
+        System.out.println(films.toString());
+        }
 }

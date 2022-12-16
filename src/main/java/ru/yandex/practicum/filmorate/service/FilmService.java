@@ -7,19 +7,24 @@ import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorageForFilm;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorageForFilm) {
         this.filmStorage = filmStorage;
+        this.userStorageForFilm = userStorageForFilm;
     }
 
     public Film createFilm(Film film) {
@@ -61,6 +66,39 @@ public class FilmService {
         } else {
             throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
         }
+    }
+
+    public void addLikeFilm(Integer id, Integer userId) {
+        if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
+            if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
+                filmStorage.getFilms().get(id).setLikes(userId);
+            } else {
+                throw new ResourceNotFoundException("Пользователь c ID: " + userId + " не найден");
+            }
+        } else {
+            throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
+        }
+    }
+
+    public void deleteLikeFilm(Integer id, Integer userId) {
+        if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
+            if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
+                filmStorage.getFilms().get(id).getLikes().remove(userId);
+            } else {
+                throw new ResourceNotFoundException("Пользователь c ID: " + userId + " не найден");
+            }
+        } else {
+            throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
+        }
+    }
+
+    public Collection<Film> findTopTenMostLikesFilms(Integer count) {
+        log.info("Получен запрос на список популярных фильмов");
+        Collection<Film> films = filmStorage.getFilms().values();
+        return films.stream()
+                .sorted(Comparator.comparing(Film::getCountLikes).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private boolean filmValidation(Film film) {
