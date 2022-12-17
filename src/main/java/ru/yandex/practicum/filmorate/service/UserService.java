@@ -76,8 +76,8 @@ public class UserService {
         if (!Objects.equals(id, friendId)) {
             if (id >= 0 && userStorage.getUsers().containsKey(id)) {
                 if (friendId >= 0 && userStorage.getUsers().containsKey(friendId)) {
-                    userStorage.getUsers().get(id).setFriend(friendId);
-                    userStorage.getUsers().get(friendId).setFriend(id);
+                    userStorage.getUsers().get(id).addFriendId(friendId);
+                    userStorage.getUsers().get(friendId).addFriendId(id);
                     log.info("Получен запрос на добавление в друзья пользователю с ID = " + id
                             + " от пользователя с ID = " + friendId);
                 } else {
@@ -97,7 +97,7 @@ public class UserService {
         final Collection<User> allFriends = new ArrayList<>();
         if (id >= 0 && userStorage.getUsers().containsKey(id)) {
             final User user = userStorage.getUsers().get(id);
-            for (Integer idFriend : user.getFriends()) {
+            for (Integer idFriend : user.getFriendIds()) {
                 allFriends.add(userStorage.getUsers().get(idFriend));
             }
             log.info("Получен запрос на получение списка всех друзей пользователя с ID = " + id);
@@ -114,8 +114,8 @@ public class UserService {
                 if (otherId >= 0 && userStorage.getUsers().containsKey(otherId)) {
                     final User user1 = userStorage.getUsers().get(id);
                     final User user2 = userStorage.getUsers().get(otherId);
-                    for (Integer idFriend : user1.getFriends()) {
-                        if (user2.getFriends().contains(idFriend)) {
+                    for (Integer idFriend : user1.getFriendIds()) {
+                        if (user2.getFriendIds().contains(idFriend)) {
                             listOfCommonFriends.add(userStorage.getUsers().get(idFriend));
                         }
                     }
@@ -139,7 +139,7 @@ public class UserService {
         if (!Objects.equals(id, friendId)) {
             if (id >= 0 && userStorage.getUsers().containsKey(id)) {
                 if (friendId >= 0 && userStorage.getUsers().containsKey(friendId)) {
-                    userStorage.getUsers().get(id).getFriends().remove(friendId);
+                    userStorage.getUsers().get(id).getFriendIds().remove(friendId);
                     log.info("Получен запрос на удаление друга с ID = " + friendId + "у пользователя с ID = " + id);
                 } else {
                     throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");

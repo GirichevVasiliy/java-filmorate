@@ -53,7 +53,7 @@ public class FilmController {
         if (Objects.isNull(count) || count < 0) {
             count = 10;
         }
-        return filmService.findTopTenMostLikesFilms(count);
+        return filmService.findTopMostLikedFilms(count);
     }
 
     //**************** DELETE ************************//

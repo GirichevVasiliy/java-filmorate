@@ -132,14 +132,8 @@ class UserControllerTest {
     @DisplayName("Тест создания и валидации несуществующего пользователя")
     void createUserAndValidationUserIsNullTest() {
         User user = null;
-        try {
-            userController.createUser(user);
-        } catch (RuntimeException e) {
-            assertAll(
-                    () -> assertEquals(e.getMessage(), "Ошибка, пользователь не задан",
-                            "Тест обновления несуществующего пользователя провален провален")
-            );
-        }
+        assertThrows(RuntimeException.class, () -> {
+            userController.createUser(user);}, "Тест создания и валидации несуществующего пользователя провален");
     }
 
     @Test
@@ -151,12 +145,9 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Адрес электронной почты не может быть пустым.",
-                    "Тест с пустым адресом электронной почты провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.createUser(user1);}, "Tест создания пользователя и валидации пользователя " +
+                "с пустым адресом электронной почты провален");
     }
 
     @Test
@@ -168,12 +159,9 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Электронная почта не прошла проверку, ошибка при вводе данных.",
-                    "Тест с неверным адресом электронной почты провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.createUser(user1);}, "Tест создания пользователя и валидации пользователя " +
+                "с неверным адресом электронной почты провален");
     }
 
     @Test
@@ -185,12 +173,8 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Логин не может содержать пробелы.",
-                    "Тест с неверным логином провален");
-        }
+        assertThrows(ValidationException.class, () -> { userController.createUser(user1);},
+                "Tест создания пользователя и валидации пользователя с пробелом в логине провален");
     }
 
     @Test
@@ -252,12 +236,8 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("2038-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Дата рождения не может быть в будущем.", "Тест с датой рождения провален");
-        }
-
+        assertThrows(ValidationException.class, () -> { userController.createUser(user1);},
+                "Тест создания пользователя и валидации пользователя из будущего провален");
     }
 
 
@@ -320,12 +300,8 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.updateUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Адрес электронной почты не может быть пустым.",
-                    "Тест с пустым адресом электронной почты провален");
-        }
+        assertThrows(ValidationException.class, () -> {userController.updateUser(user1);},
+                "Tест обновления пользователя и валидации с пустым адресом электронной почты провален");
     }
 
     @Test
@@ -340,12 +316,9 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.updateUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Логин не может содержать пробелы.",
-                    "Тест с неверным логином провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.updateUser(user1);}, "Tест обновления пользователя и валидации пользователя " +
+                "с пробелом в логине провален");
     }
 
     @Test
@@ -414,25 +387,17 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("2038-02-26"))
                 .build();
-        try {
-            userController.updateUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Дата рождения не может быть в будущем.", "Тест с датой рождения провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.updateUser(user1);}, "Тест создания пользователя и валидации " +
+                "пользователя из будущего провален");
     }
 
     @Test
     @DisplayName("Тест обновления и валидации несуществующего пользователя")
     void updateUserAndValidationUserIsNullTest() {
         User user = null;
-        try {
-            userController.updateUser(user);
-        } catch (RuntimeException e) {
-            assertAll(
-                    () -> assertEquals(e.getMessage(), "Ошибка, пользователь не задан",
-                            "Тест обновления несуществующего пользователя провален провален")
-            );
-        }
+        assertThrows(RuntimeException.class, () -> {userController.updateUser(user);}, "Тест обновления " +
+                "и валидации несуществующего пользователя провален");
     }
 
     @Test
@@ -475,9 +440,9 @@ class UserControllerTest {
         initUsers();
         userController.addFriendToUser(user0.getId(), user1.getId());
         assertAll(
-                () -> assertTrue(userController.findUserForId(user0.getId()).getFriends().contains(user1.getId()),
+                () -> assertTrue(userController.findUserForId(user0.getId()).getFriendIds().contains(user1.getId()),
                         "Пользователь id = " + user1.getId() + " не найден у пользователя " + user0.getId()),
-                () -> assertTrue(userController.findUserForId(user1.getId()).getFriends().contains(user0.getId()),
+                () -> assertTrue(userController.findUserForId(user1.getId()).getFriendIds().contains(user0.getId()),
                         "Пользователь id = " + user0.getId() + " не найден у пользователя " + user1.getId())
         );
     }

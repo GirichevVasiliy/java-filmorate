@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -43,5 +42,17 @@ public class ErrorHandler {
         return new ErrorResponse(
                 e.getMessage()
         );
+    }
+
+    private class ErrorResponse {
+        private final String error;
+
+        private ErrorResponse(String error) {
+            this.error = error;
+        }
+
+        private String getError() {
+            return error;
+        }
     }
 }

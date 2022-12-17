@@ -11,6 +11,7 @@ import java.util.Set;
 @Data
 @Builder
 public class Film {
+    private final Set<Integer> whoLikedUserIds = new HashSet<>();
     private int id;
     @NonNull
     private String name;
@@ -19,14 +20,12 @@ public class Film {
     @NonNull
     private LocalDate releaseDate;
     private int duration;
-    private final Set<Integer> likes = new HashSet<>();
-    public void setLikes(Integer like) {
-        this.likes.add(like);
+
+    public void addLike(Integer userId) {
+        this.whoLikedUserIds.add(userId);
     }
-    public Set<Integer> getLikes() {
-        return this.likes;
-    }
-    public int getCountLikes(){
-        return likes.size();
+
+    public int getLikeCount() {
+        return whoLikedUserIds.size();
     }
 }

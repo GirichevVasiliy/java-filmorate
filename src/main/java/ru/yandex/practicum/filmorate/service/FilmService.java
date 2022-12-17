@@ -29,7 +29,7 @@ public class FilmService {
 
     public Film createFilm(Film film) {
         if (!Objects.isNull(film)) {
-            if (filmVerification(film) && filmValidation(film)) {
+            if (filmValidation(film)) {
                 log.info("Добавлен новый фильм" + film.getName());
                 return filmStorage.addFilm(film);
             } else {
@@ -61,7 +61,7 @@ public class FilmService {
 
     public Collection<Film> findAllFilms() {
         log.info("Запущен метод получения всех фильмов");
-        return filmStorage.getAllFilm();
+        return filmStorage.getAllFilms();
     }
 
     public Film getFilmById(int id) {
@@ -77,7 +77,7 @@ public class FilmService {
     public void addLikeFilm(Integer id, Integer userId) {
         if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
             if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
-                filmStorage.getFilms().get(id).setLikes(userId);
+                filmStorage.getFilms().get(id).addLike(userId);
                 log.info("Добавлен лайк фильму ID = " + id + " пользователем с ID = " + userId);
             } else {
                 log.warn("Пользователь c ID: " + userId + " не найден");
@@ -92,7 +92,7 @@ public class FilmService {
     public void deleteLikeFilm(Integer id, Integer userId) {
         if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
             if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
-                filmStorage.getFilms().get(id).getLikes().remove(userId);
+                filmStorage.getFilms().get(id).getWhoLikedUserIds().remove(userId);
                 log.info("Удален лайк у фильма ID = " + id + " пользователем с ID = " + userId);
             } else {
                 log.warn("Пользователь c ID: " + userId + " не найден");
@@ -104,11 +104,11 @@ public class FilmService {
         }
     }
 
-    public Collection<Film> findTopTenMostLikesFilms(Integer count) {
+    public Collection<Film> findTopMostLikedFilms(Integer count) {
         log.info("Получен запрос на список популярных фильмов");
         Collection<Film> films = filmStorage.getFilms().values();
         return films.stream()
-                .sorted(Comparator.comparing(Film::getCountLikes).reversed())
+                .sorted(Comparator.comparing(Film::getLikeCount).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -136,17 +136,5 @@ public class FilmService {
             }
         }
         return isValidation;
-    }
-
-    private boolean filmVerification(Film film) {
-        boolean isFilmVerification = true;
-        if (!filmStorage.getAllFilm().isEmpty() && !filmStorage.getDatabaseOfFilmsForVerification().isEmpty()) {
-            if (filmStorage.getDatabaseOfFilmsForVerification().containsKey(film.getName()) &&
-                    filmStorage.getDatabaseOfFilmsForVerification().containsValue(film.getReleaseDate())) {
-                log.warn("Фильм: " + film.getName() + " зарегистрирован ранее");
-                isFilmVerification = false;
-            }
-        }
-        return isFilmVerification;
     }
 }

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -34,25 +33,14 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) {
         if (!Objects.isNull(user)) {
             final User savedUser = users.get(user.getId());
-            if (!(savedUser.getEmail().equals(user.getEmail()))) {
-                final String email = user.getEmail();
-                savedUser.setEmail(email);
-            }
-            if (!(savedUser.getLogin().equals(user.getLogin()))) {
-                final String login = user.getLogin();
-                savedUser.setLogin(login);
-            }
+            savedUser.setEmail(user.getEmail());
+            savedUser.setLogin(user.getLogin());
             if (Objects.isNull(user.getName())) {
                 user.setName(user.getLogin());
             }
-            if (!(savedUser.getName().equals(user.getName()))) {
-                final String name = user.getName();
-                savedUser.setName(name);
-            }
-            if (!(savedUser.getBirthday().equals(user.getBirthday()))) {
-                final LocalDate birthday = user.getBirthday();
-                savedUser.setBirthday(birthday);
-            }
+            savedUser.setName(user.getName());
+            savedUser.setBirthday(user.getBirthday());
+
         } else {
             throw new ErrorServer("Пользователь  не обновлен, ошибка сервера");
         }
