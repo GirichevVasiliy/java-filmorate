@@ -3,24 +3,32 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
+
     private UserController userController;
     private User user0;
     private User user1;
     private User user2;
+    private User user3;
+    private User user4;
+    private User user5;
 
     @BeforeEach
     void init() {
-        userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
     }
 
     void initUsers() {
@@ -47,6 +55,30 @@ class UserControllerTest {
         userController.createUser(user2);
     }
 
+    void initUsersForCommonFriend() {
+        user3 = User.builder()
+                .email("sidorov@yandex.ru")
+                .login("VovaSidorov")
+                .name("Sidorov Vova")
+                .birthday(LocalDate.parse("1966-03-02"))
+                .build();
+        userController.createUser(user3);
+        user4 = User.builder()
+                .email("fofanov@yandex.ru")
+                .login("IvanFofanov")
+                .name("Ivan Fofanov")
+                .birthday(LocalDate.parse("1933-09-01"))
+                .build();
+        userController.createUser(user4);
+        user5 = User.builder()
+                .email("Golovin@yandex.ru")
+                .login("VladGolovin")
+                .name("Vlad Golovin")
+                .birthday(LocalDate.parse("1999-06-01"))
+                .build();
+        userController.createUser(user5);
+    }
+
     @Test
     @DisplayName("Стандартный тест создания и валидации пользователя")
     void createUserAndValidationStandardTest() {
@@ -58,8 +90,8 @@ class UserControllerTest {
                 .build();
         userController.createUser(user1);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(user1, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(user1, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
         final User user2 = User.builder()
@@ -70,8 +102,8 @@ class UserControllerTest {
                 .build();
         userController.createUser(user2);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user2), "Пользователь не сохранен"),
-                () -> assertEquals(user2, userController.getUsers().get(user2.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user2), "Пользователь не сохранен"),
+                () -> assertEquals(user2, userController.findUserForId(user2.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -87,8 +119,8 @@ class UserControllerTest {
                 .build();
         userController.createUser(user1);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(user1, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(user1, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
         assertThrows(ValidationException.class, () -> {
@@ -100,14 +132,8 @@ class UserControllerTest {
     @DisplayName("Тест создания и валидации несуществующего пользователя")
     void createUserAndValidationUserIsNullTest() {
         User user = null;
-        try {
-            userController.createUser(user);
-        } catch (RuntimeException e) {
-            assertAll(
-                    () -> assertEquals(e.getMessage(), "Ошибка, пользователь не задан",
-                            "Тест обновления несуществующего пользователя провален провален")
-            );
-        }
+        assertThrows(RuntimeException.class, () -> {
+            userController.createUser(user);}, "Тест создания и валидации несуществующего пользователя провален");
     }
 
     @Test
@@ -119,12 +145,9 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Адрес электронной почты не может быть пустым.",
-                    "Тест с пустым адресом электронной почты провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.createUser(user1);}, "Tест создания пользователя и валидации пользователя " +
+                "с пустым адресом электронной почты провален");
     }
 
     @Test
@@ -136,12 +159,9 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Электронная почта не прошла проверку, ошибка при вводе данных.",
-                    "Тест с неверным адресом электронной почты провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.createUser(user1);}, "Tест создания пользователя и валидации пользователя " +
+                "с неверным адресом электронной почты провален");
     }
 
     @Test
@@ -153,12 +173,8 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Логин не может содержать пробелы.",
-                    "Тест с неверным логином провален");
-        }
+        assertThrows(ValidationException.class, () -> { userController.createUser(user1);},
+                "Tест создания пользователя и валидации пользователя с пробелом в логине провален");
     }
 
     @Test
@@ -180,8 +196,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -205,8 +221,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -220,12 +236,8 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("2038-02-26"))
                 .build();
-        try {
-            userController.createUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Дата рождения не может быть в будущем.", "Тест с датой рождения провален");
-        }
-
+        assertThrows(ValidationException.class, () -> { userController.createUser(user1);},
+                "Тест создания пользователя и валидации пользователя из будущего провален");
     }
 
 
@@ -253,19 +265,19 @@ class UserControllerTest {
                 .build();
         userController.updateUser(user2Control);
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1Control), "" +
+                () -> assertTrue(userController.findAllUsers().contains(user1Control), "" +
                         "Пользователь не сохранен"),
-                () -> assertEquals(user1Control, userController.getUsers().get(user1Control.getId()),
+                () -> assertEquals(user1Control, userController.findUserForId(user1Control.getId()),
                         "Пользователи не одинаковые")
         );
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user2Control), "" +
+                () -> assertTrue(userController.findAllUsers().contains(user2Control), "" +
                         "Пользователь не сохранен"),
-                () -> assertEquals(user2Control, userController.getUsers().get(user2Control.getId()),
+                () -> assertEquals(user2Control, userController.findUserForId(user2Control.getId()),
                         "Пользователи не одинаковые")
         );
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user0), "" +
+                () -> assertTrue(userController.findAllUsers().contains(user0), "" +
                         "Пользователь не сохранен"),
                 () -> assertEquals(idUser0, user0.getId(), "id не совпал"),
                 () -> assertEquals(user0.getEmail(), "petrov@yandex.ru", "Почта пользователя не совпала"),
@@ -288,12 +300,8 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.updateUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Адрес электронной почты не может быть пустым.",
-                    "Тест с пустым адресом электронной почты провален");
-        }
+        assertThrows(ValidationException.class, () -> {userController.updateUser(user1);},
+                "Tест обновления пользователя и валидации с пустым адресом электронной почты провален");
     }
 
     @Test
@@ -308,12 +316,9 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
-        try {
-            userController.updateUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Логин не может содержать пробелы.",
-                    "Тест с неверным логином провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.updateUser(user1);}, "Tест обновления пользователя и валидации пользователя " +
+                "с пробелом в логине провален");
     }
 
     @Test
@@ -337,8 +342,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -364,8 +369,8 @@ class UserControllerTest {
                 .birthday(LocalDate.parse("1987-02-26"))
                 .build();
         assertAll(
-                () -> assertTrue(userController.getUsers().containsValue(user1), "Пользователь не сохранен"),
-                () -> assertEquals(userControl, userController.getUsers().get(user1.getId()),
+                () -> assertTrue(userController.findAllUsers().contains(user1), "Пользователь не сохранен"),
+                () -> assertEquals(userControl, userController.findUserForId(user1.getId()),
                         "Пользователи не одинаковые")
         );
     }
@@ -382,25 +387,17 @@ class UserControllerTest {
                 .name("Vasiliy Girichev")
                 .birthday(LocalDate.parse("2038-02-26"))
                 .build();
-        try {
-            userController.updateUser(user1);
-        } catch (ValidationException e) {
-            assertEquals(e.getMessage(), "Дата рождения не может быть в будущем.", "Тест с датой рождения провален");
-        }
+        assertThrows(ValidationException.class, () -> {
+            userController.updateUser(user1);}, "Тест создания пользователя и валидации " +
+                "пользователя из будущего провален");
     }
 
     @Test
     @DisplayName("Тест обновления и валидации несуществующего пользователя")
     void updateUserAndValidationUserIsNullTest() {
         User user = null;
-        try {
-            userController.updateUser(user);
-        } catch (RuntimeException e) {
-            assertAll(
-                    () -> assertEquals(e.getMessage(), "Ошибка, пользователь не задан",
-                            "Тест обновления несуществующего пользователя провален провален")
-            );
-        }
+        assertThrows(RuntimeException.class, () -> {userController.updateUser(user);}, "Тест обновления " +
+                "и валидации несуществующего пользователя провален");
     }
 
     @Test
@@ -416,5 +413,183 @@ class UserControllerTest {
                 () -> assertTrue(listOfAllUsers.contains(user1), "Пользователь id = 1 не найден"),
                 () -> assertTrue(listOfAllUsers.contains(user2), "Пользователь id = 2 не найден")
         );
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по id")
+    void getUserByIdTest() {
+        initUsers();
+        final int idUserForSearch = 1;
+        User userSearch = userController.findUserForId(idUserForSearch);
+        assertEquals(userSearch, user0, "Тест поиска пользователя по id провален");
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по id")
+    void getUserByBadIdTest() {
+        initUsers();
+        final int idUserForSearch = 99999;
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findUserForId(idUserForSearch);
+        }, "Тест поиска пользователя по id провален");
+    }
+
+    @Test
+    @DisplayName("Добавление друзей пользователю")
+    void addFriendToUserTest() {
+        initUsers();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        assertAll(
+                () -> assertTrue(userController.findUserForId(user0.getId()).getFriendIds().contains(user1.getId()),
+                        "Пользователь id = " + user1.getId() + " не найден у пользователя " + user0.getId()),
+                () -> assertTrue(userController.findUserForId(user1.getId()).getFriendIds().contains(user0.getId()),
+                        "Пользователь id = " + user0.getId() + " не найден у пользователя " + user1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("Добавление друзей пользователю с одинаковым id")
+    void addFriendToUserEqualsIdTest() {
+        initUsers();
+        assertThrows(ValidationException.class, () -> {
+            userController.addFriendToUser(user0.getId(), user0.getId());
+        }, "Тест добавления друзей пользователю с одинаковым id провален");
+    }
+
+    @Test
+    @DisplayName("Добавление друзей пользователю с неверным id")
+    void addFriendToUserBadIdTest() {
+        initUsers();
+        int idBad1 = -1;
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.addFriendToUser(user0.getId(), idBad1);
+        }, "Тест создания и валидации повторяющегося пользователя провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.addFriendToUser(idBad1, user0.getId());
+        }, "Тест добавление друзей пользователю с неверным id провален");
+    }
+
+    @Test
+    @DisplayName("Получение всего списка друзей пользователя")
+    void findAllFriendsToUserTest() {
+        initUsers();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        Collection<User> idFriendListUser0 = userController.findAllFriendsToUser(user0.getId());
+        assertAll(
+                () -> assertTrue(idFriendListUser0.contains(user1),
+                        "Пользователь id = " + user1.getId() + " не найден в списке друзей у пользователя "
+                                + user0.getId()),
+                () -> assertTrue(idFriendListUser0.contains(user2),
+                        "Пользователь id = " + user2.getId() + " не найден в списке друзей у пользователя "
+                                + user0.getId())
+        );
+        userController.addFriendToUser(user1.getId(), user0.getId());
+        userController.addFriendToUser(user1.getId(), user2.getId());
+        Collection<User> idFriendListUser1 = userController.findAllFriendsToUser(user1.getId());
+        assertAll(
+                () -> assertTrue(idFriendListUser1.contains(user0),
+                        "Пользователь id = " + user1.getId() + " не найден в списке друзей у пользователя "
+                                + user0.getId()),
+                () -> assertTrue(idFriendListUser1.contains(user2),
+                        "Пользователь id = " + user2.getId() + " не найден в списке друзей у пользователя "
+                                + user0.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("Получение всего списка друзей пользователя c неверным id")
+    void findAllFriendsToUserBadIdFriendTest() {
+        initUsers();
+        int idBad1 = -1;
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findAllFriendsToUser(idBad1);
+        }, "Получение всего списка друзей пользователя c неверным id провален");
+    }
+
+    @Test
+    @DisplayName("Получение всего списка одинаковых друзей пользователей")
+    void findListOfCommonFriendsTest() {
+    initUsers();
+    initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        Collection<User> commonUser = userController.findListOfCommonFriends(user0.getId(), user1.getId());
+        assertAll(
+                () -> assertTrue(commonUser.contains(user3),
+                        "У пользователя id = " + user0.getId() + " не найден общий друг " + user3.getId()
+                                + "с пользователем " + user1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("Получение всего списка одинаковых друзей пользователей")
+    void findListOfCommonFriendsBadIdTest() {
+        int idBad1 = -1;
+        initUsers();
+        initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findListOfCommonFriends(user0.getId(),idBad1);
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findListOfCommonFriends(idBad1, user0.getId());
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.findListOfCommonFriends(idBad1, user0.getId());
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+        assertThrows(ValidationException.class, () -> {
+            userController.findListOfCommonFriends(idBad1, idBad1);
+        }, "Получение всего списка общих друзей пользователя c неверным id провален");
+    }
+    @Test
+    @DisplayName("Удаление друга пользователя по ID")
+    void deleteFriendToUserForIdTest(){
+        initUsers();
+        initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        userController.deleteFriendToUser(user0.getId(), user1.getId());
+        Collection<User> idFriendListUser0 = userController.findAllFriendsToUser(user0.getId());
+        assertAll(
+                () -> assertFalse(idFriendListUser0.contains(user1),
+                        "У пользователя id = " + user0.getId() + " найден друг " + user1.getId())
+        );
+        userController.deleteFriendToUser(user0.getId(), user2.getId());
+        Collection<User> idFriendListUser00 = userController.findAllFriendsToUser(user0.getId());
+        assertAll(
+                () -> assertFalse(idFriendListUser00.contains(user2),
+                        "У пользователя id = " + user0.getId() + " найден друг " + user2.getId())
+        );
+    }
+    @Test
+    @DisplayName("Удаление друга пользователя по неверному ID")
+    void deleteFriendToUserForBadIdTest(){
+        int idBad1 = -1;
+        initUsers();
+        initUsersForCommonFriend();
+        userController.addFriendToUser(user0.getId(), user1.getId());
+        userController.addFriendToUser(user0.getId(), user2.getId());
+        userController.addFriendToUser(user0.getId(), user3.getId());
+        userController.addFriendToUser(user1.getId(), user3.getId());
+        userController.deleteFriendToUser(user0.getId(), user1.getId());
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.deleteFriendToUser(user0.getId(),idBad1);
+        }, "Тест удаления друга пользователя по неверному ID провален");
+        assertThrows(ResourceNotFoundException.class, () -> {
+            userController.deleteFriendToUser(idBad1, user0.getId());
+        }, "Тест удаления друга пользователя по неверному ID провален");
+              assertThrows(ValidationException.class, () -> {
+            userController.deleteFriendToUser(idBad1, idBad1);
+        }, "Тест удаления друга пользователя по неверному ID провален");
     }
 }
