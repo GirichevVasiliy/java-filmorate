@@ -15,8 +15,4 @@ public interface UserStorage {
 
     User getUserById(int id);
 
-    public Map<Integer, User> getUsers();
-
-    public Set<String> getEmails();
-
 }

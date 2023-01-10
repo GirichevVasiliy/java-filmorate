@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user.impl;
 
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -10,7 +11,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
+@Repository
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -61,16 +62,5 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.query("SELECT * FROM MODEL_USER WHERE id=?", new Object[]{id},
                         new BeanPropertyRowMapper<>(User.class))
                 .stream().findAny().orElse(null);
-    }
-
-    // Данные методы тут не используются, но они есть в интерфейсе для работы хранилища
-    @Override
-    public Map<Integer, User> getUsers() {
-        return null;
-    }
-
-    @Override
-    public Set<String> getEmails() {
-        return null;
     }
 }

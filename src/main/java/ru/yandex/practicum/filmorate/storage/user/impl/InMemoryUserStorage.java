@@ -58,17 +58,7 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 
-    @Override
-    public Map<Integer, User> getUsers() {
-        return users;
-    }
-
-    @Override
-    public Set<String> getEmails() {
-        return emails;
-    }
-
-    private void generateIdUser(User user) {
+       private void generateIdUser(User user) {
         if (user.getId() == 0) {
             user.setId(++id);
         }

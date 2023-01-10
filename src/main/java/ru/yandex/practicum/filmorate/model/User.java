@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -23,5 +24,8 @@ public class User {
 
     public void addFriendId(Integer idFriends) {
         this.friendIds.add(idFriends);
+    }
+    public void setFriends(List<Integer> friends) {
+        this.friendIds.addAll(friends);
     }
 }
