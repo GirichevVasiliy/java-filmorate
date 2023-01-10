@@ -9,5 +9,5 @@ public interface FriendStorage {
 
     void deleteFriend(int userId, int friendId);
 
-    List<User> getAllFriendByUser(int userId);
+    List<Integer> getAllFriendByUser(int userId);
 }

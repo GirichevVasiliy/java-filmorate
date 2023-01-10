@@ -1,11 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.friends;
 
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import ru.yandex.practicum.filmorate.exception.ErrorServer;
-import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,11 +42,15 @@ public class FriendDbStorage implements FriendStorage {
     }
 
     @Override
-    public List<User> getAllFriendByUser(int userId) {
+    public List<Integer> getAllFriendByUser(int userId) {
         try {
-            return jdbcTemplate.query("SELECT * FROM USERS_FRIENDS WHERE user_id=?",
-                    new BeanPropertyRowMapper<>(User.class), userId);
-        } catch (Exception e){
+            return jdbcTemplate.query("SELECT friend_id FROM USERS_FRIENDS WHERE user_id=?", new RowMapper<Integer>() {
+                @Override
+                public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getInt("friend_id");
+                }
+            }, userId);
+        } catch (Exception e) {
             return new ArrayList<>();
         }
     }
