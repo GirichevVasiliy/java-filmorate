@@ -20,6 +20,8 @@ public class Film {
     @NonNull
     private LocalDate releaseDate;
     private int duration;
+    @NonNull
+    private MPA mpa;
 
     public void addLike(Integer userId) {
         this.whoLikedUserIds.add(userId);
