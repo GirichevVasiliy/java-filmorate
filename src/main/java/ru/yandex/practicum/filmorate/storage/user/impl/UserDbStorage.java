@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.user.impl;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -44,22 +46,42 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        jdbcTemplate.update("UPDATE MODEL_USER SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?;",
+        int amountLines = jdbcTemplate.update("UPDATE MODEL_USER SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?",
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
-        User updateUser = jdbcTemplate.queryForObject("SELECT * FROM MODEL_USER WHERE user_id=?",
-                new BeanPropertyRowMapper<>(User.class), user.getId());
-        return updateUser;
+        if (amountLines == 0){
+            throw new ResourceNotFoundException("Запрашиваемый пользователь для обновления данных не найден");
+        }
+        try {
+            User updateUser = jdbcTemplate.queryForObject("SELECT * FROM MODEL_USER WHERE user_id=?",
+                    (rs, rowNum) -> makeUser(rs), user.getId());
+            return updateUser;
+        } catch (EmptyResultDataAccessException e){
+            throw new ResourceNotFoundException("Измененый пользователь не найден");
+        }
     }
 
     @Override
     public Collection<User> getAllUser() {
-        return jdbcTemplate.query("SELECT * FROM MODEL_USER;", new BeanPropertyRowMapper<>(User.class));
+        return jdbcTemplate.query("SELECT * FROM MODEL_USER;", (rs, rowNum) -> makeUser(rs));
     }
 
     @Override
     public User getUserById(int id) {
-        return jdbcTemplate.query("SELECT * FROM MODEL_USER WHERE USER_ID=?", new Object[]{id},
-                        new BeanPropertyRowMapper<>(User.class))
-                .stream().findAny().orElse(null);
+        try {
+            User user = jdbcTemplate.queryForObject("SELECT * FROM MODEL_USER WHERE USER_ID=?",
+                    new BeanPropertyRowMapper<>(User.class), id);
+            return user;
+        } catch (EmptyResultDataAccessException e){
+            throw new ResourceNotFoundException("Пользователь с ID " + id + " не найден");
+        }
+    }
+    private User makeUser(ResultSet rs) throws SQLException {
+        return User.builder()
+                .id(rs.getInt("user_id"))
+                .name(rs.getString("name"))
+                .login(rs.getString("login"))
+                .email(rs.getString("email"))
+                .birthday(rs.getDate("birthday").toLocalDate())
+                .build();
     }
 }

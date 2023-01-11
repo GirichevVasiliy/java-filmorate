@@ -32,7 +32,7 @@ public class UserService {
 
     public User createUser(User newUser) {
         if (!Objects.isNull(newUser)) {
-            if (/*userVerification(newUser) &&*/ userValidation(newUser)) {
+            if (userVerification(newUser) && userValidation(newUser)) {
                 log.info("Получен запрос на добавление нового пользователя " + newUser.getEmail());
                 userStorage.addUser(newUser);
                 newUser.setFriends(friendStorage.getAllFriendByUser(newUser.getId()));
@@ -167,14 +167,14 @@ public class UserService {
         }
         return isValidation;
     }
-/*
+
     private boolean userVerification(User user) {
         Collection<User> listAllUsers = findAllUsers();
         boolean isUserVerification = true;
-        if (!listAllUsers.contains(user.getEmail())) {
+        if (listAllUsers.contains(user.getEmail())) {
             log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирован ранее");
             isUserVerification = false;
         }
         return isUserVerification;
-    }*/
+    }
 }
