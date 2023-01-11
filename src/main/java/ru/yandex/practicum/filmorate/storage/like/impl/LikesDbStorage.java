@@ -22,7 +22,8 @@ public class LikesDbStorage implements LikesStorage {
         try {
             int like = jdbcTemplate.update("INSERT INTO FILM_LIKES (film_id, user_id) VALUES (?, ?)", filmId, userId);
             if (like == 0) {
-                throw new ErrorServer("Пользователь с ID = " + userId + " " + "ранее поставил лайк фильму с ID = " + filmId);
+                throw new ErrorServer("Пользователь с ID = " + userId + " " + "ранее поставил лайк фильму с ID = "
+                        + filmId);
             }
         } catch (ErrorServer e) {
             throw new ErrorServer("Лайкнуть не удалось");
