@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.like.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
@@ -9,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-
+@Repository
 public class LikesDbStorage implements LikesStorage {
     private final JdbcTemplate jdbcTemplate;
 
