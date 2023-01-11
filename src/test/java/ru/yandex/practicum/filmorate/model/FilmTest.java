@@ -13,11 +13,13 @@ class FilmTest {
     void createFilm() {
         final int idFilm = 0;
         final int filmDuration = 300;
+        final MPA mpa = new MPA(1, "G");
         Film film = Film.builder()
                 .name("Futurama")
                 .description("American science fiction satirical adult animated television series")
                 .releaseDate(LocalDate.parse("1999-03-28"))
                 .duration(300)
+                .mpa(mpa)
                 .build();
         assertAll(
                 () -> assertEquals(idFilm, film.getId(), "id не совпал"),

@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -25,23 +27,28 @@ public class FilmService {
     private final UserStorage userStorageForFilm;
     private final MpaStorage mpaStorage;
     private final LikesStorage likesStorage;
+    private final GenreStorage genreStorage;
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorageForFilm,
                        @Qualifier("mpaDbStorage") MpaStorage mpaStorage,
-                       @Qualifier("likesDbStorage") LikesStorage likesStorage) {
+                       @Qualifier("likesDbStorage") LikesStorage likesStorage,
+                       @Qualifier("genreDbStorage") GenreStorage genreStorage) {
         this.filmStorage = filmStorage;
         this.userStorageForFilm = userStorageForFilm;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
+        this.genreStorage = genreStorage;
     }
 
     public Film createFilm(Film film) {
         if (!Objects.isNull(film)) {
             if (filmValidation(film)) {
+                Film createdFilm = filmStorage.addFilm(film);
+                addGenreToFilm(film.getGenres(), createdFilm.getId());
                 log.info("Добавлен новый фильм" + film.getName());
-                return filmStorage.addFilm(film);
+                return addLikesAndGenreToStorage(createdFilm);
             } else {
                 log.warn("Добавление нового фильма " + film.getName() + "в хранилище - не выполнен");
                 throw new ValidationException("Фильм " + film.getName() + " не сохранен, он был зарегистрирован ранее");
@@ -54,11 +61,11 @@ public class FilmService {
     public Film updateFilm(Film film) {
         Film filmForStorage = null;
         if (!Objects.isNull(film)) {
-            if (filmStorage.getFilms().containsKey(film.getId())) {
-                if (filmValidation(film)) {
-                    filmForStorage = filmStorage.updateFilm(film);
-                    log.info("Фильм " + film.getName() + " успешно обновлен");
-                }
+            if (filmValidation(film)) {
+                deleteGenreToFilm(genreStorage.getByFilmId(film.getId()), film.getId());
+                addGenreToFilm(film.getGenres(), film.getId());
+                filmForStorage = addLikesAndGenreToStorage(filmStorage.updateFilm(film));
+                log.info("Фильм " + film.getName() + " успешно обновлен");
             } else {
                 log.warn("Обновление фильма " + film.getName() + "не выполнено");
                 throw new ResourceNotFoundException("Фильм " + film.getName() + " не обновлен");
@@ -71,52 +78,31 @@ public class FilmService {
 
     public Collection<Film> findAllFilms() {
         log.info("Запущен метод получения всех фильмов");
-        return filmStorage.getAllFilms();
+        Collection<Film> allFilms = filmStorage.getAllFilms();
+        allFilms.forEach(this::addLikesAndGenreToStorage);
+        return allFilms;
     }
 
     public Film getFilmById(int id) {
-        if (filmStorage.getFilms().containsKey(id)) {
-            log.info("Поиск фильма по ID = " + id);
-            return filmStorage.getFilmById(id);
-        } else {
-            log.warn("Фильм c ID: " + id + " не найден");
-            throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
-        }
+        log.info("Поиск фильма по ID = " + id);
+        return filmStorage.getFilmById(id);
     }
 
     public void addLikeFilm(Integer id, Integer userId) {
-        if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
-            if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
-                filmStorage.getFilms().get(id).addLike(userId);
-                log.info("Добавлен лайк фильму ID = " + id + " пользователем с ID = " + userId);
-            } else {
-                log.warn("Пользователь c ID: " + userId + " не найден");
-                throw new ResourceNotFoundException("Пользователь c ID: " + userId + " не найден");
-            }
-        } else {
-            log.warn("Фильм c ID: " + id + " не найден");
-            throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
-        }
+        log.info("Запрос добавления лайка");
+        likesStorage.addLike(userId, id);
+
     }
 
     public void deleteLikeFilm(Integer id, Integer userId) {
-        if (id >= 0 && filmStorage.getFilms().containsKey(id)) {
-            if (userId >= 0 && userStorageForFilm.getUsers().containsKey(userId)) {
-                filmStorage.getFilms().get(id).getWhoLikedUserIds().remove(userId);
-                log.info("Удален лайк у фильма ID = " + id + " пользователем с ID = " + userId);
-            } else {
-                log.warn("Пользователь c ID: " + userId + " не найден");
-                throw new ResourceNotFoundException("Пользователь c ID: " + userId + " не найден");
-            }
-        } else {
-            log.warn("Фильм c ID: " + id + " не найден");
-            throw new ResourceNotFoundException("Фильм c ID: " + id + " не найден");
-        }
+        log.info("Получен запрос на удаление лайка");
+        likesStorage.deleteLike(userId, id);
+
     }
 
     public Collection<Film> findTopMostLikedFilms(Integer count) {
         log.info("Получен запрос на список популярных фильмов");
-        Collection<Film> films = filmStorage.getFilms().values();
+        Collection<Film> films = filmStorage.getAllFilms();
         return films.stream()
                 .sorted(Comparator.comparing(Film::getLikeCount).reversed())
                 .limit(count)
@@ -146,5 +132,21 @@ public class FilmService {
             }
         }
         return isValidation;
+    }
+
+    private Film addLikesAndGenreToStorage(Film film) {
+        film.setGenres(genreStorage.getByFilmId(film.getId()));
+        film.setWhoLikedUserIds(likesStorage.getFilmLikeId(film.getId()));
+        return film;
+    }
+
+    private void addGenreToFilm(Collection<Genre> genres, int filmId) {
+        if (!genres.isEmpty()) {
+            genres.forEach(g -> genreStorage.assignGenre(filmId, g.getId()));
+        }
+    }
+
+    private void deleteGenreToFilm(Collection<Genre> genres, int filmId) {
+        genres.forEach(g -> genreStorage.delete(filmId));
     }
 }

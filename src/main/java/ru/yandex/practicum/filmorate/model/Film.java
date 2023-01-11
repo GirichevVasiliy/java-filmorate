@@ -5,13 +5,16 @@ import lombok.Data;
 import lombok.NonNull;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @Builder
 public class Film {
-    private final Set<Integer> whoLikedUserIds = new HashSet<>();
+    private Collection<Integer> whoLikedUserIds = new HashSet<>();
+    private Collection<Genre> genres = new ArrayList<>();
     private int id;
     @NonNull
     private String name;
@@ -29,5 +32,8 @@ public class Film {
 
     public int getLikeCount() {
         return whoLikedUserIds.size();
+    }
+    public void addGenre(Genre genre) {
+        this.genres.add(genre);
     }
 }
