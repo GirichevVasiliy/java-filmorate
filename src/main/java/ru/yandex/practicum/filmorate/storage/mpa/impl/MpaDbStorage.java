@@ -18,12 +18,12 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<MPA> getAll() {
-        return jdbcTemplate.query("SELECT * FROM MPA_RATING", new BeanPropertyRowMapper<>(MPA.class));
+        return jdbcTemplate.query("SELECT * FROM MPA_RATING;", new BeanPropertyRowMapper<>(MPA.class));
     }
 
     @Override
     public MPA getById(Integer id) {
-        return jdbcTemplate.query("SELECT * FROM MPA_RATING WHERE id=?", new Object[]{id},
+        return jdbcTemplate.query("SELECT * FROM MPA_RATING WHERE ID_MPA_RATING=?;", new Object[]{id},
                         new BeanPropertyRowMapper<>(MPA.class))
                 .stream().findAny().orElse(null);
     }

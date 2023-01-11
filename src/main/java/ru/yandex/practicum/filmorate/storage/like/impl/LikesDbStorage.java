@@ -20,7 +20,7 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public void addLike(int userId, int filmId) {
         try {
-            int like = jdbcTemplate.update("INSERT INTO FILM_LIKES (film_id, user_id) VALUES (?, ?)", filmId, userId);
+            int like = jdbcTemplate.update("INSERT INTO FILM_LIKES (FILM_ID, USER_ID) VALUES (?, ?);", filmId, userId);
             if (like == 0) {
                 throw new ErrorServer("Пользователь с ID = " + userId + " " + "ранее поставил лайк фильму с ID = "
                         + filmId);
@@ -33,7 +33,7 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public void deleteLike(int userId, int filmId) {
         try {
-            int like = jdbcTemplate.update("DELETE FROM FILM_LIKES WHERE film_id=? AND user_id=?", filmId, userId);
+            int like = jdbcTemplate.update("DELETE FROM FILM_LIKES WHERE FILM_ID=? AND USER_ID=?;", filmId, userId);
             if (like == 0) {
                 throw new ErrorServer("Пользователь с ID = " + userId + " " + "ранее непоставил лайк фильму " +
                         "с ID = " + filmId);
@@ -46,7 +46,7 @@ public class LikesDbStorage implements LikesStorage {
     @Override
     public Collection<Integer> getFilmLikeId(int filmId) {
         try {
-            return jdbcTemplate.query("SELECT user_id FROM FILM_LIKES WHERE film_id=?", new RowMapper<Integer>() {
+            return jdbcTemplate.query("SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID=?;", new RowMapper<Integer>() {
                 @Override
                 public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
                     return rs.getInt("user_id");

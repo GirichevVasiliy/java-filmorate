@@ -1,10 +1,11 @@
-package ru.yandex.practicum.filmorate.storage.friends;
+package ru.yandex.practicum.filmorate.storage.friends.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ErrorServer;
+import ru.yandex.practicum.filmorate.storage.friends.FriendStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,31 +23,31 @@ public class FriendDbStorage implements FriendStorage {
     @Override
     public void addFriend(int userId, int friendId) {
         try {
-            SqlRowSet friendRows = jdbcTemplate.queryForRowSet("select * from USERS_FRIENDS where user_id =? " +
-                    "and friend_id = ?", userId, friendId);
+            SqlRowSet friendRows = jdbcTemplate.queryForRowSet("SELECT * FROM USERS_FRIENDS WHERE USER_ID=? AND FRIEND_ID = ?;",
+                    userId, friendId);
             if (friendRows.next()) {
-                jdbcTemplate.update("UPDATE USERS_FRIENDS SET STATUS = true where id_users_friends = ?",
+                jdbcTemplate.update("UPDATE USERS_FRIENDS SET STATUS = true WHERE ID_USERS_FRIENDS = ?;",
                         friendRows.getInt("id_users_friends"));
             } else {
-                jdbcTemplate.update("INSERT INTO USERS_FRIENDS(user_id, friend_id, status) values ( ?,?,? );",
+                jdbcTemplate.update("INSERT INTO USERS_FRIENDS(USER_ID, FRIEND_ID, STATUS) VALUES ( ?,?,? );",
                         userId, friendId, true);
-                jdbcTemplate.update("INSERT INTO USERS_FRIENDS(user_id, friend_id, status) values ( ?,?,? );",
+                jdbcTemplate.update("INSERT INTO USERS_FRIENDS(USER_ID, FRIEND_ID, STATUS) VALUES ( ?,?,? );",
                         friendId, userId, false);
             }
-        } catch (RuntimeException e1) {
+        } catch (RuntimeException e) {
             throw new ErrorServer("пользователь не существует");
         }
     }
 
     @Override
     public void deleteFriend(int userId, int friendId) {
-        jdbcTemplate.update("UPDATE USERS_FRIENDS SET status = false WHERE user_id=? AND friend_id=?", userId, friendId);
+        jdbcTemplate.update("UPDATE USERS_FRIENDS SET STATUS = false WHERE USER_ID=? AND FRIEND_ID=?;", userId, friendId);
     }
 
     @Override
     public List<Integer> getAllFriendByUser(int userId) {
         try {
-            return jdbcTemplate.query("SELECT friend_id FROM USERS_FRIENDS WHERE user_id=?", new RowMapper<Integer>() {
+            return jdbcTemplate.query("SELECT FRIEND_ID FROM USERS_FRIENDS WHERE USER_ID=?;", new RowMapper<Integer>() {
                 @Override
                 public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
                     return rs.getInt("friend_id");

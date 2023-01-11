@@ -17,12 +17,12 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Collection<Genre> getAll() {
-        return jdbcTemplate.query("SELECT * FROM GENRE_DIRECTORY", new BeanPropertyRowMapper<>(Genre.class));
+        return jdbcTemplate.query("SELECT * FROM GENRE_DIRECTORY;", new BeanPropertyRowMapper<>(Genre.class));
     }
 
     @Override
     public Genre getById(Integer id) {
-        return jdbcTemplate.query("SELECT * FROM GENRE_DIRECTORY WHERE ID_GENRE=?", new Object[]{id},
+        return jdbcTemplate.query("SELECT * FROM GENRE_DIRECTORY WHERE ID_GENRE=?;", new Object[]{id},
                         new BeanPropertyRowMapper<>(Genre.class))
                 .stream().findAny().orElse(null);
     }
@@ -36,15 +36,15 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public void assignGenre(Integer filmId, Integer genreId) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM FILMS_GENRE WHERE FILM_ID = ? AND GENRE_ID = ?;", filmId, genreId);
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM FILMS_GENRE WHERE FILM_ID = ? AND GENRE_ID = ?;",
+                filmId, genreId);
         if (!genreRows.next()) {
             jdbcTemplate.update("INSERT INTO FILMS_GENRE (FILM_ID, GENRE_ID) VALUES (?, ?);", filmId, genreId);
         }
-
     }
 
     @Override
     public void delete(Integer filmId) {
-
+        jdbcTemplate.update("DELETE FROM FILMS_GENRE WHERE FILM_ID=?;", filmId);
     }
 }

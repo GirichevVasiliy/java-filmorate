@@ -8,9 +8,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.*;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
 @Repository
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -24,7 +23,7 @@ public class UserDbStorage implements UserStorage {
         int id = 0;
         try {
             Connection connection = Objects.requireNonNull(jdbcTemplate.getDataSource()).getConnection();
-            String query = "INSERT INTO MODEL_USER (email, login, name, birthday) VALUES (?, ?, ?, ?);";
+            String query = "INSERT INTO MODEL_USER (EMAIL, LOGIN, NAME, BIRTHDAY) VALUES (?, ?, ?, ?);";
             try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
                 pstmt.setString(1, user.getName());
                 pstmt.setString(2, user.getLogin());
@@ -45,7 +44,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        jdbcTemplate.update("UPDATE MODEL_USER SET email=?, login=?, name=?, birthday=? WHERE user_id=?",
+        jdbcTemplate.update("UPDATE MODEL_USER SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?;",
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         User updateUser = jdbcTemplate.queryForObject("SELECT * FROM MODEL_USER WHERE user_id=?",
                 new BeanPropertyRowMapper<>(User.class), user.getId());
@@ -54,12 +53,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUser() {
-        return jdbcTemplate.query("SELECT * FROM MODEL_USER", new BeanPropertyRowMapper<>(User.class));
+        return jdbcTemplate.query("SELECT * FROM MODEL_USER;", new BeanPropertyRowMapper<>(User.class));
     }
 
     @Override
     public User getUserById(int id) {
-        return jdbcTemplate.query("SELECT * FROM MODEL_USER WHERE id=?", new Object[]{id},
+        return jdbcTemplate.query("SELECT * FROM MODEL_USER WHERE USER_ID=?", new Object[]{id},
                         new BeanPropertyRowMapper<>(User.class))
                 .stream().findAny().orElse(null);
     }

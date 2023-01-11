@@ -6,7 +6,18 @@ INSERT INTO model_film (name,  description, releaseDate, duration, mpaRating_rat
 INSERT INTO model_film (name,  description, releaseDate, duration, mpaRating_rating) VALUES ('Фильм-6', 'film6', '1992-07-03', 103, 1 );
 INSERT INTO model_film (name,  description, releaseDate, duration, mpaRating_rating) VALUES ('Фильм-7', 'film7', '1993-07-03', 103, 1 );
 
-INSERT INTO films_genre (film_id, genre_id) VALUES (0, 1);
-INSERT INTO films_genre (film_id, genre_id) VALUES (0, 2);
+INSERT INTO films_genre (film_id, genre_id) VALUES (1, 1);
+INSERT INTO films_genre (film_id, genre_id) VALUES (1, 2);
+
+INSERT INTO model_user (email, login, name, birthday) VALUES ('fg@ya.ru', 'Bravo', 'Nikolay', '1993-07-03');
+INSERT INTO model_user (email, login, name, birthday) VALUES ('gtr@ya.ru', 'PetrVi', 'petr', '1995-02-11');
+INSERT INTO model_user (email, login, name, birthday) VALUES ('trt@ya.ru', 'Vika', 'Viktoria', '1991-03-12');
+INSERT INTO model_user (email, login, name, birthday) VALUES ('eee@ya.ru', 'An', 'Anna', '1999-01-19');
+
+INSERT INTO users_friends(user_id, friend_id, status) VALUES ( 1, 2, false );
+INSERT INTO users_friends(user_id, friend_id, status) VALUES ( 2, 3, true );
+
+INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 1, 1 );
+INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 1, 2 );
 
 
