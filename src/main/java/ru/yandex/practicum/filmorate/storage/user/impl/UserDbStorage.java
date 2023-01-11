@@ -27,9 +27,9 @@ public class UserDbStorage implements UserStorage {
             Connection connection = Objects.requireNonNull(jdbcTemplate.getDataSource()).getConnection();
             String query = "INSERT INTO MODEL_USER (EMAIL, LOGIN, NAME, BIRTHDAY) VALUES (?, ?, ?, ?);";
             try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-                pstmt.setString(1, user.getName());
+                pstmt.setString(1, user.getEmail());
                 pstmt.setString(2, user.getLogin());
-                pstmt.setString(3, user.getEmail());
+                pstmt.setString(3, user.getName());
                 pstmt.setDate(4, Date.valueOf(user.getBirthday()));
                 pstmt.executeUpdate();
                 try (ResultSet keys = pstmt.getGeneratedKeys()) {
@@ -69,7 +69,7 @@ public class UserDbStorage implements UserStorage {
     public User getUserById(int id) {
         try {
             User user = jdbcTemplate.queryForObject("SELECT * FROM MODEL_USER WHERE USER_ID=?",
-                    new BeanPropertyRowMapper<>(User.class), id);
+                    (rs, rowNum) -> makeUser(rs), id);
             return user;
         } catch (EmptyResultDataAccessException e){
             throw new ResourceNotFoundException("Пользователь с ID " + id + " не найден");
