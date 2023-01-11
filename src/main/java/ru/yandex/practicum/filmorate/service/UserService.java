@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -76,7 +77,16 @@ public class UserService {
     }
 
     public void addFriendToUser(Integer id, Integer friendId) {
-        if (!Objects.equals(id, friendId)) {
+        log.info("Получен запрос на добавление в друзья пользователю с ID = " + id
+                + " от пользователя с ID = " + friendId);
+        try {
+            friendStorage.addFriend(id, friendId);
+        } catch (ErrorServer e){
+            throw new ResourceNotFoundException("Пользователь не добавлен в друзья");
+        }
+
+
+       /* if (!Objects.equals(id, friendId)) {
             final Collection<User> allUsers = findAllUsers();
             if (allUsers.contains(userStorage.getUserById(id))) {
                 if (allUsers.contains(userStorage.getUserById(friendId))) {
@@ -93,7 +103,7 @@ public class UserService {
             }
         } else {
             throw new ValidationException("Пользователь не может добавить сам себя в друзья");
-        }
+        }*/
     }
 
     public Collection<User> findAllFriendsToUser(@PathVariable Integer id) {
@@ -108,9 +118,9 @@ public class UserService {
     public Collection<User> findListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         final Collection<User> listOfCommonFriends = new ArrayList<>();
         if (!Objects.equals(id, otherId)) {
-            final User user1 = userStorage.getUserById(id);
+            User user1 = userStorage.getUserById(id);
             user1.setFriends(friendStorage.getAllFriendByUser(user1.getId()));
-            final User user2 = userStorage.getUserById(otherId);
+            User user2 = userStorage.getUserById(otherId);
             user2.setFriends(friendStorage.getAllFriendByUser(user2.getId()));
             for (Integer idFriend : user1.getFriendIds()) {
                 if (user2.getFriendIds().contains(idFriend)) {
