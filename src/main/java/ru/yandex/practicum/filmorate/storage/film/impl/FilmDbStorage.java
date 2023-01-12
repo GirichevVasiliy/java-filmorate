@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.film.impl;
 
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
@@ -20,7 +21,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilms() {
-        return jdbcTemplate.query("SELECT * FROM MODEL_FILM;", new BeanPropertyRowMapper<>(Film.class));
+        return jdbcTemplate.query("SELECT * FROM MODEL_FILM AS mf INNER JOIN MPA_RATING AS mpa " +
+                "ON mf.MPARATING_RATING = mpa.ID_MPA_RATING", new FilmMapper());
     }
 
     @Override
@@ -50,18 +52,33 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        jdbcTemplate.update("UPDATE MODEL_FILM SET NAME=?, DESCRIPTION=?, RELEASEDATE=?, DURATION=?, MPARATING_RATING=?" +
-                        " WHERE FILM_ID=?;", film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
-                film.getMpa(), film.getId());
-        Film updateFilm = jdbcTemplate.queryForObject("SELECT * FROM MODEL_FILM WHERE FILM_ID=?",
-                new BeanPropertyRowMapper<>(Film.class), film.getId());
-        return updateFilm;
+        int amountLines = jdbcTemplate.update("UPDATE MODEL_FILM SET NAME=?, " +
+                        "DESCRIPTION = ?, " +
+                        "RELEASEDATE = ?, " +
+                        "DURATION= ?, " +
+                        "MPARATING_RATING =? " +
+                        "WHERE FILM_ID = ?",
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa().getId(),
+                film.getId());
+        if (amountLines == 0) {
+            throw new ResourceNotFoundException("Фильм для изменения не найден");
+        }
+        return film;
     }
 
     @Override
     public Film getFilmById(int id) {
-        return jdbcTemplate.query("SELECT * FROM MODEL_FILM WHERE FILM_ID=?", new Object[]{id},
-                        new BeanPropertyRowMapper<>(Film.class))
-                .stream().findAny().orElse(null);
+        Film film = new Film();
+        try {
+            film = jdbcTemplate.queryForObject("SELECT * FROM MODEL_FILM AS mf INNER JOIN MPA_RATING AS mpa " +
+                    "ON mf.MPARATING_RATING = mpa.ID_MPA_RATING WHERE FILM_ID=?", new FilmMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException("Фильм с ID " + id + " не найден или отсуствует");
+        }
+        return film;
     }
 }

@@ -1,15 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.like.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ErrorServer;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+
 @Repository
 public class LikesDbStorage implements LikesStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -27,7 +28,7 @@ public class LikesDbStorage implements LikesStorage {
                         + filmId);
             }
         } catch (ErrorServer e) {
-            throw new ErrorServer("Лайкнуть не удалось");
+            throw new ResourceNotFoundException("Лайкнуть не удалось");
         }
     }
 
@@ -40,21 +41,21 @@ public class LikesDbStorage implements LikesStorage {
                         "с ID = " + filmId);
             }
         } catch (ErrorServer e) {
-            throw new ErrorServer("Не удалось удалить лайк, ошибка запроса");
+            throw new ResourceNotFoundException("Не удалось удалить лайк, ошибка запроса");
         }
     }
 
     @Override
     public Collection<Integer> getFilmLikeId(int filmId) {
+        String sqlQuery = "SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID = ?";
         try {
-            return jdbcTemplate.query("SELECT USER_ID FROM FILM_LIKES WHERE FILM_ID=?;", new RowMapper<Integer>() {
-                @Override
-                public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return rs.getInt("user_id");
-                }
-            }, filmId);
+            return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> createLikeId(rs), filmId);
         } catch (Exception e) {
             return new ArrayList<>();
         }
+    }
+
+    private int createLikeId(ResultSet rs) throws SQLException {
+        return rs.getInt("USER_ID");
     }
 }

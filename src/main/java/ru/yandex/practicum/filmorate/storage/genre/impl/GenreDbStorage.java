@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.genre.impl;
 
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
@@ -25,9 +24,9 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getById(Integer id) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM GENRE_DIRECTORY WHERE ID_GENRE=?", id);
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM GENRE_DIRECTORY WHERE ID=?", id);
         if (genreRows.next()) {
-            return new Genre(genreRows.getInt("id_genre"), genreRows.getString("genre_name"));
+            return new Genre(genreRows.getInt("id"), genreRows.getString("genre_name"));
         } else {
             throw new ResourceNotFoundException("Ошибочный запрос, жанр отсутствует");
         }
@@ -35,8 +34,8 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Collection<Genre> getByFilmId(Integer filmId) {
-        return jdbcTemplate.query("SELECT fg.GENRE_ID as ID, gd.GENRE_NAME FROM FILMS_GENRE AS fg INNER JOIN GENRE_DIRECTORY " +
-                "AS gd ON fg.GENRE_ID = gd.ID_GENRE WHERE FILM_ID", new GenreMapper(), filmId);
+        String sql1 = "SELECT fg.GENRE_ID as ID, g.GENRE_NAME FROM FILMS_GENRE AS fg JOIN GENRE_DIRECTORY AS g ON fg.genre_id = g.id WHERE FILM_ID = ?;";
+        return jdbcTemplate.query(sql1, new GenreMapper(), filmId);
     }
 
     @Override

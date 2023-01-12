@@ -21,15 +21,13 @@ public class FilmController {
     //**************** POST************************//
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
-        filmService.createFilm(film);
-        return film;
+        return filmService.createFilm(film);
     }
 
     //**************** PUT************************//
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-        filmService.updateFilm(film);
-        return film;
+        return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")

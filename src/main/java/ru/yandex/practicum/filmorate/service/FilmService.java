@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
-import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -24,20 +22,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorageForFilm;
-    private final MpaStorage mpaStorage;
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorageForFilm,
-                       @Qualifier("mpaDbStorage") MpaStorage mpaStorage,
                        @Qualifier("likesDbStorage") LikesStorage likesStorage,
                        @Qualifier("genreDbStorage") GenreStorage genreStorage) {
         this.filmStorage = filmStorage;
-        this.userStorageForFilm = userStorageForFilm;
-        this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
         this.genreStorage = genreStorage;
     }
@@ -60,19 +52,16 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         Film filmForStorage = null;
-        if (!Objects.isNull(film)) {
-            if (filmValidation(film)) {
-                deleteGenreToFilm(genreStorage.getByFilmId(film.getId()), film.getId());
-                addGenreToFilm(film.getGenres(), film.getId());
-                filmForStorage = addLikesAndGenreToStorage(filmStorage.updateFilm(film));
-                log.info("Фильм " + film.getName() + " успешно обновлен");
-            } else {
-                log.warn("Обновление фильма " + film.getName() + "не выполнено");
-                throw new ResourceNotFoundException("Фильм " + film.getName() + " не обновлен");
-            }
+        if (filmValidation(film)) {
+            deleteGenreToFilm(genreStorage.getByFilmId(film.getId()), film.getId());
+            addGenreToFilm(film.getGenres(), film.getId());
+            filmForStorage = addLikesAndGenreToStorage(filmStorage.updateFilm(film));
+            log.info("Фильм " + film.getName() + " успешно обновлен");
         } else {
-            throw new RuntimeException("Ошибка, фильм не задан");
+            log.warn("Обновление фильма " + film.getName() + "не выполнено");
+            throw new ResourceNotFoundException("Фильм " + film.getName() + " не обновлен");
         }
+
         return filmForStorage;
     }
 
@@ -85,7 +74,7 @@ public class FilmService {
 
     public Film getFilmById(int id) {
         log.info("Поиск фильма по ID = " + id);
-        return filmStorage.getFilmById(id);
+        return addLikesAndGenreToStorage(filmStorage.getFilmById(id));
     }
 
     public void addLikeFilm(Integer id, Integer userId) {
@@ -103,6 +92,7 @@ public class FilmService {
     public Collection<Film> findTopMostLikedFilms(Integer count) {
         log.info("Получен запрос на список популярных фильмов");
         Collection<Film> films = filmStorage.getAllFilms();
+        films.forEach(this::addLikesAndGenreToStorage);
         return films.stream()
                 .sorted(Comparator.comparing(Film::getLikeCount).reversed())
                 .limit(count)
@@ -149,4 +139,5 @@ public class FilmService {
     private void deleteGenreToFilm(Collection<Genre> genres, int filmId) {
         genres.forEach(g -> genreStorage.delete(filmId));
     }
+
 }

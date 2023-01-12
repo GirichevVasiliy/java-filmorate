@@ -81,29 +81,9 @@ public class UserService {
                 + " от пользователя с ID = " + friendId);
         try {
             friendStorage.addFriend(id, friendId);
-        } catch (ErrorServer e){
+        } catch (ErrorServer e) {
             throw new ResourceNotFoundException("Пользователь не добавлен в друзья");
         }
-
-
-       /* if (!Objects.equals(id, friendId)) {
-            final Collection<User> allUsers = findAllUsers();
-            if (allUsers.contains(userStorage.getUserById(id))) {
-                if (allUsers.contains(userStorage.getUserById(friendId))) {
-                    friendStorage.addFriend(id, friendId);
-                    log.info("Получен запрос на добавление в друзья пользователю с ID = " + id
-                            + " от пользователя с ID = " + friendId);
-                } else {
-                    log.warn("Пользователь c ID: " + friendId + " не найден");
-                    throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
-                }
-            } else {
-                log.warn("Пользователь c ID: " + id + " не найден");
-                throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
-            }
-        } else {
-            throw new ValidationException("Пользователь не может добавить сам себя в друзья");
-        }*/
     }
 
     public Collection<User> findAllFriendsToUser(@PathVariable Integer id) {

@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,10 +26,12 @@ public class User {
         createFriends();
         this.friendIds.add(idFriends);
     }
+
     public void setFriends(List<Integer> friends) {
         createFriends();
         this.friendIds.addAll(friends);
     }
+
     private void createFriends() {
         if (friendIds == null) {
             friendIds = new HashSet<>();

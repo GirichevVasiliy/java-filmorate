@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user.impl;
 
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
@@ -48,14 +47,14 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         int amountLines = jdbcTemplate.update("UPDATE MODEL_USER SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?",
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
-        if (amountLines == 0){
+        if (amountLines == 0) {
             throw new ResourceNotFoundException("Запрашиваемый пользователь для обновления данных не найден");
         }
         try {
             User updateUser = jdbcTemplate.queryForObject("SELECT * FROM MODEL_USER WHERE user_id=?",
                     (rs, rowNum) -> makeUser(rs), user.getId());
             return updateUser;
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             throw new ResourceNotFoundException("Измененый пользователь не найден");
         }
     }
@@ -71,10 +70,11 @@ public class UserDbStorage implements UserStorage {
             User user = jdbcTemplate.queryForObject("SELECT * FROM MODEL_USER WHERE USER_ID=?",
                     (rs, rowNum) -> makeUser(rs), id);
             return user;
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             throw new ResourceNotFoundException("Пользователь с ID " + id + " не найден");
         }
     }
+
     private User makeUser(ResultSet rs) throws SQLException {
         return User.builder()
                 .id(rs.getInt("user_id"))
