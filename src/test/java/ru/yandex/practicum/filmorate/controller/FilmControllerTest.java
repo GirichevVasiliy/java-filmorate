@@ -1,16 +1,23 @@
+/*
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.impl.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.impl.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.impl.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.like.impl.LikesDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.impl.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.impl.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
 
-   /* private FilmController filmController;
-    private UserStorage userStorage;
+   private FilmController filmController;
+    private UserDbStorage userStorage;
     private Film film0;
     private Film film1;
     private Film film2;
@@ -29,8 +36,8 @@ class FilmControllerTest {
 
     @BeforeEach
     void init() {
-        userStorage = new InMemoryUserStorage();
-        //filmController = new FilmController(new FilmService((new InMemoryFilmStorage()), (userStorage)));
+        userStorage = new UserDbStorage(new JdbcTemplate());
+        filmController = new FilmController(new FilmService((new FilmDbStorage(new JdbcTemplate())), (new LikesDbStorage(new JdbcTemplate())), (new GenreDbStorage(new JdbcTemplate()))));
     }
 
     void initFilms() {
@@ -437,5 +444,5 @@ class FilmControllerTest {
         assertThrows(ResourceNotFoundException.class, () -> {
             filmController.deleteLikeFilm(id, userId);
         }, "Получение фильма c неверным id провален");
-    }*/
-}
+    }
+}*/

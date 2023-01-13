@@ -12,5 +12,3 @@ MERGE INTO mpa_rating (id_mpa_rating, rating_name) VALUES ( 2, 'PG' );
 MERGE INTO mpa_rating (id_mpa_rating, rating_name) VALUES ( 3, 'PG-13' );
 MERGE INTO mpa_rating (id_mpa_rating, rating_name) VALUES ( 4, 'R' );
 MERGE INTO mpa_rating (id_mpa_rating, rating_name) VALUES ( 5, 'NC-17' );
-
-

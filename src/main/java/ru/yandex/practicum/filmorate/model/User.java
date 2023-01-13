@@ -22,6 +22,14 @@ public class User {
     @NonNull
     private LocalDate birthday;
 
+    public User(int id, @NonNull String email, @NonNull String login, String name, @NonNull LocalDate birthday) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
+
     public void addFriendId(Integer idFriends) {
         createFriends();
         this.friendIds.add(idFriends);
