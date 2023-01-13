@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class User {
-    private Set<Integer> friendIds;
+    private Collection<Integer> friendIds;
     private int id;
     @NonNull
     private String email;
