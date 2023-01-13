@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.impl.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.friends.impl.FriendDbStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.impl.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.like.impl.LikesDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.impl.MpaDbStorage;
@@ -248,6 +247,7 @@ class FilmoRateApplicationTests {
         User user = getUserById(id4);
         assertThat(user.getFriendIds().contains(id3)).isTrue();
     }
+
     @Test
     @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
@@ -272,14 +272,15 @@ class FilmoRateApplicationTests {
         Collection<Integer> allFriendByUser = friendDbStorage.getAllFriendByUser(id);
         assertThat(allFriendByUser.contains(idFriend2)).isTrue();
         assertThat(allFriendByUser.contains(idFriend3)).isTrue();
-        assertThat(allFriendByUser.size()==size).isTrue();
+        assertThat(allFriendByUser.size() == size).isTrue();
     }
+
     @Test
     @DisplayName("Список всех жанров")
-    public void getAllGenreTest(){
+    public void getAllGenreTest() {
         final int size = 6;
         Collection<Genre> allGenre = new ArrayList<>(genreDbStorage.getAll());
-        assertThat(allGenre.size()==size).isTrue();
+        assertThat(allGenre.size() == size).isTrue();
         assertThat(allGenre.contains(new Genre(1, "Комедия"))).isTrue();
         assertThat(allGenre.contains(new Genre(2, "Драма"))).isTrue();
         assertThat(allGenre.contains(new Genre(3, "Мультфильм"))).isTrue();
@@ -287,9 +288,10 @@ class FilmoRateApplicationTests {
         assertThat(allGenre.contains(new Genre(5, "Документальный"))).isTrue();
         assertThat(allGenre.contains(new Genre(6, "Боевик"))).isTrue();
     }
+
     @Test
     @DisplayName("Поиск жанра по ID")
-    public void getByIdGenreTest(){
+    public void getByIdGenreTest() {
         final int id = 1;
         Genre genreSearchForID = genreDbStorage.getById(id);
         Optional<Genre> genreOptional = Optional.ofNullable(genreSearchForID);
@@ -298,29 +300,31 @@ class FilmoRateApplicationTests {
                 .hasValueSatisfying(genre -> assertThat(genre).hasFieldOrPropertyWithValue("id", genreSearchForID.getId()))
                 .hasValueSatisfying(user -> assertThat(user).hasFieldOrPropertyWithValue("name", genreSearchForID.getName()));
     }
+
     @Test
     @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Поиск жанра по ID")
-    public void getByFilmIdGenreTest(){
+    public void getByFilmIdGenreTest() {
         final int id = 1;
         final int size = 2;
         Collection<Genre> allGenreByFilmId = new ArrayList<>(genreDbStorage.getByFilmId(id));
-        assertThat(allGenreByFilmId.size()==size).isTrue();
+        assertThat(allGenreByFilmId.size() == size).isTrue();
         assertThat(allGenreByFilmId.contains(new Genre(1, "Комедия"))).isTrue();
         assertThat(allGenreByFilmId.contains(new Genre(2, "Драма"))).isTrue();
     }
+
     @Test
     @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Добавление жанра")
-    public void assignGenreTest(){
+    public void assignGenreTest() {
         final int idFilm = 1;
         final int idGere = 3;
         final int size = 3;
         genreDbStorage.assignGenre(idFilm, idGere);
         Collection<Genre> allGenreByFilmId = new ArrayList<>(genreDbStorage.getByFilmId(idFilm));
-        assertThat(allGenreByFilmId.size()==size).isTrue();
+        assertThat(allGenreByFilmId.size() == size).isTrue();
         assertThat(allGenreByFilmId.contains(new Genre(1, "Комедия"))).isTrue();
         assertThat(allGenreByFilmId.contains(new Genre(2, "Драма"))).isTrue();
         assertThat(allGenreByFilmId.contains(new Genre(3, "Мультфильм"))).isTrue();
@@ -330,20 +334,21 @@ class FilmoRateApplicationTests {
     @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Удаление жанра")
-    public void deleteGenreTest(){
+    public void deleteGenreTest() {
         final int idFilm = 1;
         final int size = 0;
         genreDbStorage.delete(idFilm);
         Collection<Genre> allGenreByFilmId = new ArrayList<>(genreDbStorage.getByFilmId(idFilm));
-        assertThat(allGenreByFilmId.size()==size).isTrue();
+        assertThat(allGenreByFilmId.size() == size).isTrue();
         assertThat(allGenreByFilmId.contains(new Genre(1, "Комедия"))).isFalse();
         assertThat(allGenreByFilmId.contains(new Genre(2, "Драма"))).isFalse();
     }
+
     @Test
     @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Добавление лайка")
-    public void addLikeTest(){
+    public void addLikeTest() {
         final int idFilm = 2;
         final int idUser1 = 1;
         final int idUser2 = 2;
@@ -351,15 +356,16 @@ class FilmoRateApplicationTests {
         likesDbStorage.addLike(idUser1, idFilm);
         likesDbStorage.addLike(idUser2, idFilm);
         Collection<Integer> allLike = new ArrayList<>(likesDbStorage.getFilmLikeId(idFilm));
-        assertThat(allLike.size()==size).isTrue();
+        assertThat(allLike.size() == size).isTrue();
         assertThat(allLike.contains(idUser1)).isTrue();
         assertThat(allLike.contains(idUser2)).isTrue();
     }
+
     @Test
     @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Удаление лайка")
-    public void deleteLikeTest(){
+    public void deleteLikeTest() {
         final int idFilm = 2;
         final int idUser1 = 1;
         final int idUser2 = 2;
@@ -369,39 +375,42 @@ class FilmoRateApplicationTests {
         likesDbStorage.deleteLike(idUser1, idFilm);
         likesDbStorage.deleteLike(idUser2, idFilm);
         Collection<Integer> allLike = new ArrayList<>(likesDbStorage.getFilmLikeId(idFilm));
-        assertThat(allLike.size()==size).isTrue();
+        assertThat(allLike.size() == size).isTrue();
         assertThat(allLike.contains(idUser1)).isFalse();
         assertThat(allLike.contains(idUser2)).isFalse();
     }
+
     @Test
     @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Поиск лайков у фильма")
-    public void getFilmLikeId(){
+    public void getFilmLikeId() {
         final int idFilm = 1;
         final int idUser1 = 1;
         final int idUser2 = 2;
         final int size = 2;
         Collection<Integer> allLike = new ArrayList<>(likesDbStorage.getFilmLikeId(idFilm));
-        assertThat(allLike.size()==size).isTrue();
+        assertThat(allLike.size() == size).isTrue();
         assertThat(allLike.contains(idUser1)).isTrue();
         assertThat(allLike.contains(idUser2)).isTrue();
     }
+
     @Test
     @DisplayName("Список всех жанров")
-    public void getAllMpaTest(){
+    public void getAllMpaTest() {
         final int size = 5;
         Collection<MPA> mpa = new ArrayList<>(mpaDbStorage.getAll());
-        assertThat(mpa.size()==size).isTrue();
+        assertThat(mpa.size() == size).isTrue();
         assertThat(mpa.contains(new MPA(1, "G"))).isTrue();
         assertThat(mpa.contains(new MPA(2, "PG"))).isTrue();
         assertThat(mpa.contains(new MPA(3, "PG-13"))).isTrue();
         assertThat(mpa.contains(new MPA(4, "R"))).isTrue();
         assertThat(mpa.contains(new MPA(5, "NC-17"))).isTrue();
     }
+
     @Test
     @DisplayName("Список всех жанров")
-    public void getByIdMpaTest(){
+    public void getByIdMpaTest() {
         final int id = 1;
         MPA mpa = mpaDbStorage.getById(id);
         Optional<MPA> mpaOptional = Optional.ofNullable(mpa);
