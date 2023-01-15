@@ -27,7 +27,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        int id = 0;
+
         try {
             Connection connection = Objects.requireNonNull(jdbcTemplate.getDataSource()).getConnection();
             String query = "INSERT INTO MODEL_FILM (NAME, DESCRIPTION, RELEASEDATE, DURATION, MPARATING_RATING) VALUES (?, ?, ?, ?, ? );";
@@ -40,7 +40,7 @@ public class FilmDbStorage implements FilmStorage {
                 statement.executeUpdate();
                 try (ResultSet keys = statement.getGeneratedKeys()) {
                     keys.next();
-                    id = keys.getInt(1);
+                    int id = keys.getInt(1);
                     film.setId(id);
                 }
             }

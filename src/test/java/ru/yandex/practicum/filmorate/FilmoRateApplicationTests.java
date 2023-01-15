@@ -24,10 +24,7 @@ import ru.yandex.practicum.filmorate.storage.user.impl.UserDbStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -345,7 +342,7 @@ class FilmoRateApplicationTests {
     }
 
     @Test
-    @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(value = {"classpath:data-test-likes.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Добавление лайка")
     public void addLikeTest() {
@@ -362,7 +359,7 @@ class FilmoRateApplicationTests {
     }
 
     @Test
-    @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(value = {"classpath:data-test-likes.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Удаление лайка")
     public void deleteLikeTest() {

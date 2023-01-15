@@ -125,15 +125,14 @@ public class FilmService {
     }
 
     private Film addLikesAndGenreToStorage(Film film) {
+
         film.setGenres(genreStorage.getByFilmId(film.getId()));
         film.setWhoLikedUserIds(likesStorage.getFilmLikeId(film.getId()));
         return film;
     }
 
     private void addGenreToFilm(Collection<Genre> genres, int filmId) {
-        if (!genres.isEmpty()) {
             genres.forEach(g -> genreStorage.assignGenre(filmId, g.getId()));
-        }
     }
 
     private void deleteGenreToFilm(Collection<Genre> genres, int filmId) {
