@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.test.context.jdbc.Sql;
@@ -433,4 +434,13 @@ class FilmoRateApplicationTests {
         }
         return user;
     }
+    @Test
+    @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void get() {
+        Map <Integer, Film> allFilm = filmDbStorage.getAllFilm111();
+        System.out.println(allFilm.toString());
+    }
+
+
 }

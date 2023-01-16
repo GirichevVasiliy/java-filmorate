@@ -125,7 +125,6 @@ public class FilmService {
     }
 
     private Film addLikesAndGenreToStorage(Film film) {
-
         film.setGenres(genreStorage.getByFilmId(film.getId()));
         film.setWhoLikedUserIds(likesStorage.getFilmLikeId(film.getId()));
         return film;

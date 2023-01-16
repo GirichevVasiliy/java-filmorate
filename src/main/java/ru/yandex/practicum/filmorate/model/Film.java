@@ -34,6 +34,15 @@ public class Film {
         this.mpa = mpa;
         createGenres();
     }
+    public Film(String name, String description, LocalDate releaseDate, int duration, MPA mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        createGenres();
+    }
 
     public void addLike(Integer userId) {
         createLikes();

@@ -5,11 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.*;
-import java.util.Collection;
-import java.util.Objects;
+import java.sql.Date;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Repository
 public class FilmDbStorage implements FilmStorage {
@@ -81,4 +84,27 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film;
     }
+    public Map<Integer, Film> getAllFilm111() {
+        String sql = "SELECT mf.FILM_ID, mf.NAME, mf.DESCRIPTION, mf.RELEASEDATE, mf.DURATION, mf.MPARATING_RATING, mpa.RATING_NAME, fg.GENRE_ID, gd.GENRE_NAME, fl.USER_ID\n" +
+                "FROM MODEL_FILM AS mf\n" +
+                "         LEFT OUTER JOIN MPA_RATING AS mpa ON mf.MPARATING_RATING = mpa.ID_MPA_RATING\n" +
+                "         LEFT OUTER JOIN FILMS_GENRE AS fg ON mf.FILM_ID = fg.FILM_ID\n" +
+                "         LEFT OUTER JOIN GENRE_DIRECTORY AS gd ON fg.GENRE_ID = gd.ID\n" +
+                "         LEFT OUTER JOIN FILM_LIKES AS fl ON  mf.FILM_ID = fl.FILM_ID;";
+        List<Film> allFilm = jdbcTemplate.query(sql, new AllFilmMapper());
+        Map<Integer, Film> l = new HashMap();
+        for(Film film: allFilm){
+            int id = film.getId();
+           if (!l.containsKey(id)){
+               l.put(id, film);
+           } else {
+              l.get(film.getId()).getWhoLikedUserIds().addAll(film.getWhoLikedUserIds());
+              l.get(film.getId()).getGenres().addAll(film.getGenres());
+                   }
+           }
+
+        return l;
+    }
+
+
 }
