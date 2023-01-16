@@ -51,15 +51,4 @@ public class AllFilmMapper implements RowMapper<Film> {
             }
             return genres;
         }
-   /* private List<Integer> setWhoLikedUserIds(ResultSet rowSet, String idsUsers) throws SQLException {
-        List<Integer> like = new ArrayList<>();
-        if (!like.contains("null")) {
-            int[] userIds = Arrays.stream(idsUsers.split(", ")).mapToInt(Integer::parseInt).toArray();
-
-            for (int i = 0; i < userIds.length; i++) {
-                like.add(userIds[i]);
-            }
-        }
-        return like;
-    }*/
 }

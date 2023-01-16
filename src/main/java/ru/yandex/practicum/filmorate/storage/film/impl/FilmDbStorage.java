@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film.impl;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
@@ -24,15 +25,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilms() {
-       /* return jdbcTemplate.query("SELECT * FROM MODEL_FILM AS mf INNER JOIN MPA_RATING AS mpa " +
-                "ON mf.MPARATING_RATING = mpa.ID_MPA_RATING", new FilmMapper());*/
         String sql = "SELECT mf.FILM_ID, mf.NAME, mf.DESCRIPTION, mf.RELEASEDATE, mf.DURATION, mf.MPARATING_RATING, mpa.RATING_NAME, fg.GENRE_ID, gd.GENRE_NAME, fl.USER_ID\n" +
                 "FROM MODEL_FILM AS mf\n" +
                 "         LEFT OUTER JOIN MPA_RATING AS mpa ON mf.MPARATING_RATING = mpa.ID_MPA_RATING\n" +
                 "         LEFT OUTER JOIN FILMS_GENRE AS fg ON mf.FILM_ID = fg.FILM_ID\n" +
                 "         LEFT OUTER JOIN GENRE_DIRECTORY AS gd ON fg.GENRE_ID = gd.ID\n" +
                 "         LEFT OUTER JOIN FILM_LIKES AS fl ON  mf.FILM_ID = fl.FILM_ID;";
-
         return jdbcTemplate.query(sql, new AllFilmMapper());
     }
 
@@ -92,4 +90,5 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film;
     }
+
 }

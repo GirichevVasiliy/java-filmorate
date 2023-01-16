@@ -146,14 +146,10 @@ class FilmoRateApplicationTests {
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Получение всего списка фильмов")
     public void getAllFilmsTest() {
-        Collection<Film> allFilmsForTest = filmDbStorage.getAllFilms();
-       /* Collection<Film> allFilmsForTest = jdbcTemplate.query("SELECT * FROM MODEL_FILM AS mf INNER JOIN " +
-                "MPA_RATING AS mpa ON mf.MPARATING_RATING = mpa.ID_MPA_RATING", (rs, rowNum) -> makeFilm(rs));
         Collection<Film> allFilms = filmDbStorage.getAllFilms();
-        assertThat(allFilmsForTest).isNotNull();
         assertThat(allFilms)
-                .isNotNull()
-                .isEqualTo(allFilmsForTest);*/
+                .isNotNull();
+        assertThat((allFilms).size() == 10);
     }
 
     @Test

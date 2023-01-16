@@ -25,8 +25,8 @@ INSERT INTO users_friends(user_id, friend_id, status) VALUES ( 1, 3, true );
 INSERT INTO users_friends(user_id, friend_id, status) VALUES ( 2, 1, true );
 INSERT INTO users_friends(user_id, friend_id, status) VALUES ( 2, 3, true );
 
---INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 1, 1 );
---INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 1, 2 );
+INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 1, 1 );
+INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 1, 2 );
 INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 2, 3 );
 INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 3, 2 );
 INSERT INTO FILM_LIKES (film_id, user_id) VALUES ( 4, 2 );

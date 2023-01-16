@@ -66,18 +66,13 @@ public class FilmService {
     public Collection<Film> findAllFilms() {
         log.info("Запущен метод получения всех фильмов");
         Collection<Film> allFilms = filmStorage.getAllFilms();
-        //allFilms.forEach(this::addLikesAndGenreToStorage);
         Map<Integer, Film> l = new HashMap();
         for (Film film : allFilms) {
             int id = film.getId();
             if (!l.containsKey(id)) {
                 l.put(id, film);
             } else {
-                Set<Integer> likes = new HashSet<>();
-                likes.addAll(l.get(film.getId()).getWhoLikedUserIds());
-                likes.addAll(film.getWhoLikedUserIds());
-                l.get(film.getId()).getWhoLikedUserIds().clear();
-                l.get(film.getId()).getWhoLikedUserIds().addAll(likes);
+                l.get(film.getId()).getWhoLikedUserIds().addAll(film.getWhoLikedUserIds());
                 l.get(film.getId()).getGenres().addAll(film.getGenres());
             }
         }
