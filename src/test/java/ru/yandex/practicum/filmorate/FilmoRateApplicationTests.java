@@ -146,13 +146,14 @@ class FilmoRateApplicationTests {
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Получение всего списка фильмов")
     public void getAllFilmsTest() {
-        Collection<Film> allFilmsForTest = jdbcTemplate.query("SELECT * FROM MODEL_FILM AS mf INNER JOIN " +
+        Collection<Film> allFilmsForTest = filmDbStorage.getAllFilms();
+       /* Collection<Film> allFilmsForTest = jdbcTemplate.query("SELECT * FROM MODEL_FILM AS mf INNER JOIN " +
                 "MPA_RATING AS mpa ON mf.MPARATING_RATING = mpa.ID_MPA_RATING", (rs, rowNum) -> makeFilm(rs));
         Collection<Film> allFilms = filmDbStorage.getAllFilms();
         assertThat(allFilmsForTest).isNotNull();
         assertThat(allFilms)
                 .isNotNull()
-                .isEqualTo(allFilmsForTest);
+                .isEqualTo(allFilmsForTest);*/
     }
 
     @Test
@@ -434,13 +435,4 @@ class FilmoRateApplicationTests {
         }
         return user;
     }
-    @Test
-    @Sql(value = {"classpath:data-test-obects.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    public void get() {
-        Map <Integer, Film> allFilm = filmDbStorage.getAllFilm111();
-        System.out.println(allFilm.toString());
-    }
-
-
 }

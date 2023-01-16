@@ -13,9 +13,7 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,8 +66,23 @@ public class FilmService {
     public Collection<Film> findAllFilms() {
         log.info("Запущен метод получения всех фильмов");
         Collection<Film> allFilms = filmStorage.getAllFilms();
-        allFilms.forEach(this::addLikesAndGenreToStorage);
-        return allFilms;
+        //allFilms.forEach(this::addLikesAndGenreToStorage);
+        Map<Integer, Film> l = new HashMap();
+        for (Film film : allFilms) {
+            int id = film.getId();
+            if (!l.containsKey(id)) {
+                l.put(id, film);
+            } else {
+                Set<Integer> likes = new HashSet<>();
+                likes.addAll(l.get(film.getId()).getWhoLikedUserIds());
+                likes.addAll(film.getWhoLikedUserIds());
+                l.get(film.getId()).getWhoLikedUserIds().clear();
+                l.get(film.getId()).getWhoLikedUserIds().addAll(likes);
+                l.get(film.getId()).getGenres().addAll(film.getGenres());
+            }
+        }
+        Collection<Film> allFilmsFull = new ArrayList<>(l.values());
+        return allFilmsFull;
     }
 
     public Film getFilmById(int id) {
