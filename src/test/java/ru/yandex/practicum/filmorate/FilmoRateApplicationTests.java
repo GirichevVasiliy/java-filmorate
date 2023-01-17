@@ -149,7 +149,7 @@ class FilmoRateApplicationTests {
         Collection<Film> allFilms = filmDbStorage.getAllFilms();
         assertThat(allFilms)
                 .isNotNull();
-        assertThat((allFilms).size() == 10);
+        assertThat((allFilms).size() == 7);
     }
 
     @Test

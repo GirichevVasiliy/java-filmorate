@@ -66,7 +66,7 @@ public class FilmService {
     public Collection<Film> findAllFilms() {
         log.info("Запущен метод получения всех фильмов");
         Collection<Film> allFilms = filmStorage.getAllFilms();
-        Map<Integer, Film> l = new HashMap();
+        /*Map<Integer, Film> l = new HashMap();
         for (Film film : allFilms) {
             int id = film.getId();
             if (!l.containsKey(id)) {
@@ -76,8 +76,8 @@ public class FilmService {
                 l.get(film.getId()).getGenres().addAll(film.getGenres());
             }
         }
-        Collection<Film> allFilmsFull = new ArrayList<>(l.values());
-        return allFilmsFull;
+        Collection<Film> allFilmsFull = new ArrayList<>(l.values());*/
+        return allFilms;
     }
 
     public Film getFilmById(int id) {
@@ -100,7 +100,7 @@ public class FilmService {
     public Collection<Film> findTopMostLikedFilms(Integer count) {
         log.info("Получен запрос на список популярных фильмов");
         Collection<Film> films = filmStorage.getAllFilms();
-        films.forEach(this::addLikesAndGenreToStorage);
+        //films.forEach(this::addLikesAndGenreToStorage);
         return films.stream()
                 .sorted(Comparator.comparing(Film::getLikeCount).reversed())
                 .limit(count)
