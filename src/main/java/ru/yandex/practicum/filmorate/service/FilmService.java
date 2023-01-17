@@ -49,7 +49,8 @@ public class FilmService {
     public Film updateFilm(Film film) {
         Film filmForStorage = null;
         if (filmValidation(film)) {
-            deleteGenreToFilm(genreStorage.getByFilmId(film.getId()), film.getId());
+            //deleteGenreToFilm(genreStorage.getByFilmId(film.getId()), film.getId());
+            deleteGenreToFilm(film.getId());
             addGenreToFilm(film.getGenres(), film.getId());
             filmForStorage = addLikesAndGenreToStorage(filmStorage.updateFilm(film));
             log.info("Фильм " + film.getName() + " успешно обновлен");
@@ -87,8 +88,6 @@ public class FilmService {
     public Collection<Film> findTopMostLikedFilms(Integer count) {
         log.info("Получен запрос на список популярных фильмов");
         Collection<Film> films = filmStorage.findTopMostLikedFilms(count);
-        //films.forEach(this::addLikesAndGenreToStorage);
-        //films.stream().sorted(Comparator.comparing(Film::getLikeCount).reversed()).limit(count).collect(Collectors.toList());
         return films;
     }
 
@@ -127,8 +126,8 @@ public class FilmService {
         genres.forEach(g -> genreStorage.assignGenre(filmId, g.getId()));
     }
 
-    private void deleteGenreToFilm(Collection<Genre> genres, int filmId) {
-        genres.forEach(g -> genreStorage.delete(filmId));
+    private void deleteGenreToFilm(int filmId) {
+         genreStorage.delete(filmId);
     }
 
 }
