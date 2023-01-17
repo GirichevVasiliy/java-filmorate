@@ -58,7 +58,7 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 
-       private void generateIdUser(User user) {
+    private void generateIdUser(User user) {
         if (user.getId() == 0) {
             user.setId(++id);
         }

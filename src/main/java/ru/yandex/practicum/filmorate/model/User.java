@@ -29,6 +29,7 @@ public class User {
         this.name = name;
         this.birthday = birthday;
     }
+
     public User(@NonNull String email, @NonNull String login, String name, @NonNull LocalDate birthday) {
         this.email = email;
         this.login = login;

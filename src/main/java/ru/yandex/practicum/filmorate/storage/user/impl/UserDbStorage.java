@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.impl.mapper.UserMapperForStatus;
 
 import java.sql.*;
 import java.util.Collection;
@@ -61,7 +62,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUser() {
-        //return jdbcTemplate.query("SELECT * FROM MODEL_USER;", (rs, rowNum) -> makeUser(rs));
         return jdbcTemplate.query("SELECT mu.USER_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY, " +
                 "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(uf.FRIEND_ID))) AS FRIEND_ID, " +
                 "TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(uf.STATUS))))) AS STATUS " +
@@ -90,4 +90,5 @@ public class UserDbStorage implements UserStorage {
                 .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
     }
+
 }

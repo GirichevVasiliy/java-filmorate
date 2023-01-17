@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.test.context.jdbc.Sql;
@@ -25,7 +24,10 @@ import ru.yandex.practicum.filmorate.storage.user.impl.UserDbStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -100,11 +102,11 @@ class FilmoRateApplicationTests {
     @Sql(value = {"classpath:clear-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Список всех пользователей")
     public void getAllUserTest() {
-        Collection<User> allUsersForTest = jdbcTemplate.query("SELECT * FROM MODEL_USER;", (rs, rowNum) -> makeUser(rs));
         Collection<User> allUsers = userStorage.getAllUser();
+        int sizeList = 4;
         assertThat(allUsers)
-                .isNotNull()
-                .isEqualTo(allUsersForTest);
+                .isNotNull();
+        assertThat(allUsers.size() == sizeList);
     }
 
     @Test

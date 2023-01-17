@@ -13,8 +13,8 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikesStorage;
 
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -127,7 +127,7 @@ public class FilmService {
     }
 
     private void deleteGenreToFilm(int filmId) {
-         genreStorage.delete(filmId);
+        genreStorage.delete(filmId);
     }
 
 }

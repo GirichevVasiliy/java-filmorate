@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserException;
@@ -16,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -36,7 +36,6 @@ public class UserService {
             if (userVerification(newUser) && userValidation(newUser)) {
                 log.info("Получен запрос на добавление нового пользователя " + newUser.getEmail());
                 userStorage.addUser(newUser);
-                //newUser.setFriends(friendStorage.getAllFriendByUser(newUser.getId()));
                 return newUser;
             } else {
                 log.warn("Получен запрос к эндпоинту: Создания пользователя - не выполнен");
@@ -64,10 +63,7 @@ public class UserService {
 
     public Collection<User> findAllUsers() {
         log.info("Получен запрос на получение списка всех пользователей");
-        Collection<User> users = userStorage.getAllUser();
-
-        //users.forEach(user -> user.setFriends(friendStorage.getAllFriendByUser(user.getId())));
-        return users;
+        return userStorage.getAllUser();
     }
 
     public User getUserById(Integer id) {
@@ -89,8 +85,17 @@ public class UserService {
 
     public Collection<User> findAllFriendsToUser(Integer id) {
         final Collection<User> allFriends = new ArrayList<>();
-        for (Integer idFriend : friendStorage.getAllFriendByUser(id)) {
-            allFriends.add(userStorage.getUserById(idFriend));
+
+        User userForSearch = userStorage.getUserById(id);
+        userForSearch.setFriends(friendStorage.getAllFriendByUser(id));
+
+        List<User> us = new ArrayList<>(userStorage.getAllUser());
+        if (!Objects.isNull(userForSearch.getFriendIds())) {
+            us.stream().forEach(user -> {
+                if (userForSearch.getFriendIds().contains(user.getId())) {
+                    allFriends.add(user);
+                }
+            });
         }
         log.info("Получен запрос на получение списка всех друзей пользователя с ID = " + id);
         return allFriends;
@@ -162,7 +167,7 @@ public class UserService {
     private boolean userVerification(User user) {
         Collection<User> listAllUsers = findAllUsers();
         boolean isUserVerification = true;
-        if (listAllUsers.contains(user.getEmail())) {
+        if (listAllUsers.contains(user)) {
             log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирован ранее");
             isUserVerification = false;
         }

@@ -93,8 +93,9 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film;
     }
+
     @Override
-    public Collection<Film> findTopMostLikedFilms(Integer count){
+    public Collection<Film> findTopMostLikedFilms(Integer count) {
         return jdbcTemplate.query("SELECT mf.FILM_ID, mf.NAME, mf.DESCRIPTION, mf.RELEASEDATE, mf.DURATION, " +
                 "mf.MPARATING_RATING, mpa.RATING_NAME, " +
                 "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(DISTINCT fg.GENRE_ID))) AS GENRE_ID, " +
