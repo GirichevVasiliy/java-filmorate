@@ -36,7 +36,7 @@ public class AllFilmMapper implements RowMapper<Film> {
 
         private SortedSet<Genre> getGenresForFilm(ResultSet rowSet, String ids) throws SQLException {
                 SortedSet<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));
-                if (!Objects.isNull(ids) && !ids.isEmpty()) {
+                if (!ids.contains("null") && !ids.isEmpty()) {
                     int[] genreIds = Arrays.stream(ids.split(", ")).mapToInt(Integer::parseInt).toArray();
                     String[] genreNames = rowSet.getString("GENRE_NAME").split(", ");
 
@@ -48,7 +48,7 @@ public class AllFilmMapper implements RowMapper<Film> {
         }
     private Set<Integer> getLikesForFilm(ResultSet rowSet, String idsUsers) throws SQLException {
         Set<Integer> likes = new HashSet<>();
-        if (!Objects.isNull(idsUsers) && !idsUsers.isEmpty()) {
+        if (!idsUsers.contains("null") && !idsUsers.isEmpty()) {
             int[] usersIds = Arrays.stream(idsUsers.split(", ")).mapToInt(Integer::parseInt).toArray();
             for (int i = 0; i < usersIds.length; i++) {
                 likes.add(usersIds[i]);

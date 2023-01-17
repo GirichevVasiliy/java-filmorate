@@ -54,7 +54,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
-      public Map<Integer, Film> getFilms() {
+    @Override
+    public Collection<Film> findTopMostLikedFilms(Integer count) {
+        return null;
+    }
+
+    public Map<Integer, Film> getFilms() {
         return films;
     }
 

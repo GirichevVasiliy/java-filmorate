@@ -24,9 +24,7 @@ public class FilmService {
     private final GenreStorage genreStorage;
 
     @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("likesDbStorage") LikesStorage likesStorage,
-                       @Qualifier("genreDbStorage") GenreStorage genreStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("likesDbStorage") LikesStorage likesStorage, @Qualifier("genreDbStorage") GenreStorage genreStorage) {
         this.filmStorage = filmStorage;
         this.likesStorage = likesStorage;
         this.genreStorage = genreStorage;
@@ -66,17 +64,6 @@ public class FilmService {
     public Collection<Film> findAllFilms() {
         log.info("Запущен метод получения всех фильмов");
         Collection<Film> allFilms = filmStorage.getAllFilms();
-        /*Map<Integer, Film> l = new HashMap();
-        for (Film film : allFilms) {
-            int id = film.getId();
-            if (!l.containsKey(id)) {
-                l.put(id, film);
-            } else {
-                l.get(film.getId()).getWhoLikedUserIds().addAll(film.getWhoLikedUserIds());
-                l.get(film.getId()).getGenres().addAll(film.getGenres());
-            }
-        }
-        Collection<Film> allFilmsFull = new ArrayList<>(l.values());*/
         return allFilms;
     }
 
@@ -99,12 +86,10 @@ public class FilmService {
 
     public Collection<Film> findTopMostLikedFilms(Integer count) {
         log.info("Получен запрос на список популярных фильмов");
-        Collection<Film> films = filmStorage.getAllFilms();
+        Collection<Film> films = filmStorage.findTopMostLikedFilms(count);
         //films.forEach(this::addLikesAndGenreToStorage);
-        return films.stream()
-                .sorted(Comparator.comparing(Film::getLikeCount).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        //films.stream().sorted(Comparator.comparing(Film::getLikeCount).reversed()).limit(count).collect(Collectors.toList());
+        return films;
     }
 
     private boolean filmValidation(Film film) {
@@ -139,7 +124,7 @@ public class FilmService {
     }
 
     private void addGenreToFilm(Collection<Genre> genres, int filmId) {
-            genres.forEach(g -> genreStorage.assignGenre(filmId, g.getId()));
+        genres.forEach(g -> genreStorage.assignGenre(filmId, g.getId()));
     }
 
     private void deleteGenreToFilm(Collection<Genre> genres, int filmId) {
