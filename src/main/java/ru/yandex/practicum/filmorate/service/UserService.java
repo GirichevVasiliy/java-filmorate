@@ -36,7 +36,7 @@ public class UserService {
             if (userVerification(newUser) && userValidation(newUser)) {
                 log.info("Получен запрос на добавление нового пользователя " + newUser.getEmail());
                 userStorage.addUser(newUser);
-                newUser.setFriends(friendStorage.getAllFriendByUser(newUser.getId()));
+                //newUser.setFriends(friendStorage.getAllFriendByUser(newUser.getId()));
                 return newUser;
             } else {
                 log.warn("Получен запрос к эндпоинту: Создания пользователя - не выполнен");
@@ -65,7 +65,8 @@ public class UserService {
     public Collection<User> findAllUsers() {
         log.info("Получен запрос на получение списка всех пользователей");
         Collection<User> users = userStorage.getAllUser();
-        users.forEach(user -> user.setFriends(friendStorage.getAllFriendByUser(user.getId())));
+
+        //users.forEach(user -> user.setFriends(friendStorage.getAllFriendByUser(user.getId())));
         return users;
     }
 
@@ -86,7 +87,7 @@ public class UserService {
         }
     }
 
-    public Collection<User> findAllFriendsToUser(@PathVariable Integer id) {
+    public Collection<User> findAllFriendsToUser(Integer id) {
         final Collection<User> allFriends = new ArrayList<>();
         for (Integer idFriend : friendStorage.getAllFriendByUser(id)) {
             allFriends.add(userStorage.getUserById(idFriend));
@@ -95,7 +96,7 @@ public class UserService {
         return allFriends;
     }
 
-    public Collection<User> findListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+    public Collection<User> findListOfCommonFriends(Integer id, Integer otherId) {
         final Collection<User> listOfCommonFriends = new ArrayList<>();
         if (!Objects.equals(id, otherId)) {
             User user1 = userStorage.getUserById(id);

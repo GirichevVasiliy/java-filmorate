@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.impl.mappers.AllFilmMapper;
+import ru.yandex.practicum.filmorate.storage.film.impl.mappers.FilmMapper;
 
 import java.sql.*;
 import java.util.Collection;

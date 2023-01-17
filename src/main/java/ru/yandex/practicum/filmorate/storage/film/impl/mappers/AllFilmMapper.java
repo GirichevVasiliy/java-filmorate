@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.film.impl;
+package ru.yandex.practicum.filmorate.storage.film.impl.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -12,7 +12,6 @@ import java.util.*;
 public class AllFilmMapper implements RowMapper<Film> {
         @Override
         public Film mapRow(ResultSet rowSet, int rowNum) throws SQLException {
-            Integer idUser = 0;
             String idsUsers = "";
             String ids = "";
             try{

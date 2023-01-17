@@ -36,7 +36,7 @@ public class FilmService {
                 Film createdFilm = filmStorage.addFilm(film);
                 addGenreToFilm(film.getGenres(), createdFilm.getId());
                 log.info("Добавлен новый фильм" + film.getName());
-                return addLikesAndGenreToStorage(createdFilm);
+                return createdFilm;
             } else {
                 log.warn("Добавление нового фильма " + film.getName() + "в хранилище - не выполнен");
                 throw new ValidationException("Фильм " + film.getName() + " не сохранен, он был зарегистрирован ранее");

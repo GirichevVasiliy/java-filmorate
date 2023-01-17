@@ -61,7 +61,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUser() {
-        return jdbcTemplate.query("SELECT * FROM MODEL_USER;", (rs, rowNum) -> makeUser(rs));
+        //return jdbcTemplate.query("SELECT * FROM MODEL_USER;", (rs, rowNum) -> makeUser(rs));
+        return jdbcTemplate.query("SELECT mu.USER_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY, " +
+                "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(uf.FRIEND_ID))) AS FRIEND_ID, " +
+                "TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(uf.STATUS))))) AS STATUS " +
+                "FROM MODEL_USER AS mu " +
+                "LEFT OUTER JOIN USERS_FRIENDS AS uf ON mu.USER_ID = uf.USER_ID " +
+                "GROUP BY mu.USER_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY;", new UserMapperForStatus());
     }
 
     @Override
