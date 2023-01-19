@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.impl.mapper.UserMapperForFriends;
 import ru.yandex.practicum.filmorate.storage.user.impl.mapper.UserMapperForStatus;
 
 import java.sql.*;
@@ -80,6 +81,18 @@ public class UserDbStorage implements UserStorage {
             throw new ResourceNotFoundException("Пользователь с ID " + id + " не найден");
         }
     }
+    @Override
+    public Collection<User> findAllFriendsToUser(Integer id){
+           String sql = "SELECT uf.FRIEND_ID AS U_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY, " +
+                "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(u.FRIEND_ID))) AS F_ID, " +
+                "TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(u.STATUS)))) AS ST_F " +
+                "FROM USERS_FRIENDS AS uf " +
+                "LEFT JOIN MODEL_USER AS mu ON uf.FRIEND_ID = mu.USER_ID " +
+                "LEFT JOIN USERS_FRIENDS AS u ON u.USER_ID = uf.FRIEND_ID " +
+                "WHERE uf.USER_ID = ? AND uf.STATUS = true " +
+                "GROUP BY U_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY;";
+        return jdbcTemplate.query(sql, new UserMapperForFriends(), id);
+    }
 
     private User makeUser(ResultSet rs) throws SQLException {
         return User.builder()
@@ -90,5 +103,4 @@ public class UserDbStorage implements UserStorage {
                 .birthday(rs.getDate("birthday").toLocalDate())
                 .build();
     }
-
 }

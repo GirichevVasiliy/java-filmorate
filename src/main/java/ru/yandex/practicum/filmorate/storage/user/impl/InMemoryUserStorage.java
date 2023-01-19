@@ -58,6 +58,11 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 
+    @Override
+    public Collection<User> findAllFriendsToUser(Integer id) {
+        return null;
+    }
+
     private void generateIdUser(User user) {
         if (user.getId() == 0) {
             user.setId(++id);

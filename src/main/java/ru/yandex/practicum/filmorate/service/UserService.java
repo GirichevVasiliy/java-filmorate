@@ -84,7 +84,7 @@ public class UserService {
     }
 
     public Collection<User> findAllFriendsToUser(Integer id) {
-        final Collection<User> allFriends = new ArrayList<>();
+       /* final Collection<User> allFriends = new ArrayList<>();
 
         User userForSearch = userStorage.getUserById(id);
         userForSearch.setFriends(friendStorage.getAllFriendByUser(id));
@@ -96,9 +96,9 @@ public class UserService {
                     allFriends.add(user);
                 }
             });
-        }
+        }*/
         log.info("Получен запрос на получение списка всех друзей пользователя с ID = " + id);
-        return allFriends;
+        return userStorage.findAllFriendsToUser(id);
     }
 
     public Collection<User> findListOfCommonFriends(Integer id, Integer otherId) {
