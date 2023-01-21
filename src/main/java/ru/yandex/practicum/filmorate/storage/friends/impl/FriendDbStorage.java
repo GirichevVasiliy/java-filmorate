@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage.friends.impl;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.ErrorServer;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.storage.friends.FriendStorage;
 
 import java.sql.ResultSet;
@@ -33,8 +33,8 @@ public class FriendDbStorage implements FriendStorage {
                 jdbcTemplate.update("INSERT INTO USERS_FRIENDS(USER_ID, FRIEND_ID, STATUS) VALUES ( ?,?,? );",
                         friendId, userId, false);
             }
-        } catch (RuntimeException e) {
-            throw new ErrorServer("пользователь не существует");
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("пользователь не существует");
         }
     }
 

@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ErrorServer;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -15,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -76,27 +74,10 @@ public class UserService {
     public void addFriendToUser(Integer id, Integer friendId) {
         log.info("Получен запрос на добавление в друзья пользователю с ID = " + id
                 + " от пользователя с ID = " + friendId);
-        try {
-            friendStorage.addFriend(id, friendId);
-        } catch (ErrorServer e) {
-            throw new ResourceNotFoundException("Пользователь не добавлен в друзья");
-        }
+        friendStorage.addFriend(id, friendId);
     }
 
     public Collection<User> findAllFriendsToUser(Integer id) {
-       /* final Collection<User> allFriends = new ArrayList<>();
-
-        User userForSearch = userStorage.getUserById(id);
-        userForSearch.setFriends(friendStorage.getAllFriendByUser(id));
-
-        List<User> us = new ArrayList<>(userStorage.getAllUser());
-        if (!Objects.isNull(userForSearch.getFriendIds())) {
-            us.stream().forEach(user -> {
-                if (userForSearch.getFriendIds().contains(user.getId())) {
-                    allFriends.add(user);
-                }
-            });
-        }*/
         log.info("Получен запрос на получение списка всех друзей пользователя с ID = " + id);
         return userStorage.findAllFriendsToUser(id);
     }

@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.user.impl.mapper.UserMapperForFriends;
-import ru.yandex.practicum.filmorate.storage.user.impl.mapper.UserMapperForStatus;
 
 import java.sql.*;
 import java.util.Collection;
@@ -63,12 +62,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUser() {
-        return jdbcTemplate.query("SELECT mu.USER_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY, " +
-                "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(uf.FRIEND_ID))) AS FRIEND_ID, " +
-                "TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(uf.STATUS))))) AS STATUS " +
+        return jdbcTemplate.query("SELECT mu.USER_ID AS U_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY, " +
+                "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(uf.FRIEND_ID))) AS F_ID, " +
+                "TRIM(BOTH ']' from TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(uf.STATUS))))) AS ST_F " +
                 "FROM MODEL_USER AS mu " +
                 "LEFT OUTER JOIN USERS_FRIENDS AS uf ON mu.USER_ID = uf.USER_ID " +
-                "GROUP BY mu.USER_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY;", new UserMapperForStatus());
+                "GROUP BY U_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY;", new UserMapperForFriends());
     }
 
     @Override
@@ -81,9 +80,10 @@ public class UserDbStorage implements UserStorage {
             throw new ResourceNotFoundException("Пользователь с ID " + id + " не найден");
         }
     }
+
     @Override
-    public Collection<User> findAllFriendsToUser(Integer id){
-           String sql = "SELECT uf.FRIEND_ID AS U_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY, " +
+    public Collection<User> findAllFriendsToUser(Integer id) {
+        String sql = "SELECT uf.FRIEND_ID AS U_ID, mu.EMAIL, mu.LOGIN, mu.NAME, mu.BIRTHDAY, " +
                 "TRIM(BOTH ']' from TRIM(BOTH '[' FROM ARRAY_AGG(u.FRIEND_ID))) AS F_ID, " +
                 "TRIM(BOTH '[' FROM TRIM(BOTH '}' from TRIM(BOTH '{' FROM ARRAY_AGG(u.STATUS)))) AS ST_F " +
                 "FROM USERS_FRIENDS AS uf " +

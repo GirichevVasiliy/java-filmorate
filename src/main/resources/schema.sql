@@ -17,13 +17,12 @@ CREATE TABLE IF NOT EXISTS genre_directory(
 CREATE TABLE IF NOT EXISTS films_genre(
     film_id INTEGER REFERENCES model_film (film_id) ON DELETE CASCADE,
     genre_id INTEGER REFERENCES genre_directory(id) ON DELETE CASCADE,
-    PRIMARY KEY (film_id, genre_id),
-    CONSTRAINT id_films_genre UNIQUE (film_id, genre_id));
+    PRIMARY KEY (film_id, genre_id));
 
 CREATE TABLE IF NOT EXISTS model_user(
     user_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     email varchar NOT NULL,
-   login varchar NOT NULL,
+    login varchar NOT NULL,
     name varchar,
     birthday date NOT NULL
     CONSTRAINT wrong_birthday_date CHECK (birthday < CURRENT_DATE)
@@ -33,12 +32,10 @@ CREATE TABLE IF NOT EXISTS users_friends(
     user_id INTEGER REFERENCES model_user(user_id) ON DELETE CASCADE,
     friend_id INTEGER REFERENCES model_user(user_id) ON DELETE CASCADE,
     status boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (user_id, friend_id),
-    CONSTRAINT id_users_friends UNIQUE (user_id, friend_id)
+    PRIMARY KEY (user_id, friend_id)
 );
 CREATE TABLE IF NOT EXISTS film_likes(
     film_id INTEGER REFERENCES model_film(film_id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES model_user(user_id) ON DELETE CASCADE,
-    PRIMARY KEY (film_id, user_id),
-    CONSTRAINT id_film_likes UNIQUE (film_id, user_id)
+    PRIMARY KEY (film_id, user_id)
 );

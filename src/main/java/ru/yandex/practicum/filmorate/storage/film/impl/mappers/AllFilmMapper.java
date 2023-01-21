@@ -12,14 +12,8 @@ import java.util.*;
 public class AllFilmMapper implements RowMapper<Film> {
     @Override
     public Film mapRow(ResultSet rowSet, int rowNum) throws SQLException {
-        String idsUsers = "";
-        String ids = "";
-        try {
-            ids = rowSet.getString("GENRE_ID");
-            idsUsers = rowSet.getString("USER_ID");
-        } catch (NullPointerException e) {
-            e.getMessage();
-        }
+        String ids = rowSet.getString("GENRE_ID");
+        String idsUsers = rowSet.getString("USER_ID");
         Film film = new Film(
                 rowSet.getString("name"),
                 rowSet.getString("description"),
@@ -28,7 +22,7 @@ public class AllFilmMapper implements RowMapper<Film> {
                 new MPA(rowSet.getInt("MPARATING_RATING"), rowSet.getString("rating_name")));
         film.setId(rowSet.getInt("film_id"));
         film.setGenres(getGenresForFilm(rowSet, ids));
-        film.setWhoLikedUserIds(getLikesForFilm(rowSet, idsUsers));
+        film.setWhoLikedUserIds(getLikesForFilm(idsUsers));
 
         return film;
     }
@@ -46,7 +40,7 @@ public class AllFilmMapper implements RowMapper<Film> {
         return genres;
     }
 
-    private Set<Integer> getLikesForFilm(ResultSet rowSet, String idsUsers) throws SQLException {
+    private Set<Integer> getLikesForFilm(String idsUsers) throws SQLException {
         Set<Integer> likes = new HashSet<>();
         if (!idsUsers.contains("null") && !idsUsers.isEmpty()) {
             int[] usersIds = Arrays.stream(idsUsers.split(", ")).mapToInt(Integer::parseInt).toArray();

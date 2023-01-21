@@ -21,13 +21,12 @@ import ru.yandex.practicum.filmorate.storage.like.impl.LikesDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.impl.MpaDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.impl.UserDbStorage;
 
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
