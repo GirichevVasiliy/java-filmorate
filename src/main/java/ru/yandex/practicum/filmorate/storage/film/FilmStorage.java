@@ -8,14 +8,12 @@ import java.util.Map;
 public interface FilmStorage {
     Collection<Film> getAllFilms();
 
-    Map<Integer, Film> getFilms();
-
     Film addFilm(Film film);
-
 
     Film updateFilm(Film film);
 
     Film getFilmById(int id);
 
+    Collection<Film> findTopMostLikedFilms(Integer count);
 }
 

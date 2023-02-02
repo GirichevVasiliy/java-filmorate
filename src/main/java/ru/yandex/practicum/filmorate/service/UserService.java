@@ -2,12 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friends.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -19,17 +20,21 @@ import java.util.Objects;
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendStorage friendStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("friendDbStorage") FriendStorage friendStorage) {
         this.userStorage = userStorage;
+        this.friendStorage = friendStorage;
     }
 
     public User createUser(User newUser) {
         if (!Objects.isNull(newUser)) {
             if (userVerification(newUser) && userValidation(newUser)) {
                 log.info("Получен запрос на добавление нового пользователя " + newUser.getEmail());
-                return userStorage.addUser(newUser);
+                userStorage.addUser(newUser);
+                return newUser;
             } else {
                 log.warn("Получен запрос к эндпоинту: Создания пользователя - не выполнен");
                 throw new ValidationException("Пользователь " + newUser.getEmail() +
@@ -43,13 +48,10 @@ public class UserService {
     public User updateUser(User user) {
         User userForStorage = null;
         if (!Objects.isNull(user)) {
-            if (userStorage.getUsers().containsKey(user.getId())) {
-                if (userValidation(user)) {
-                    userForStorage = userStorage.updateUser(user);
-                    log.info("Получен запрос на обновление пользователя " + user.getEmail());
-                }
-            } else {
-                throw new ResourceNotFoundException("Пользователь не обновлен");
+            if (userValidation(user)) {
+                userForStorage = userStorage.updateUser(user);
+                user.setFriends(friendStorage.getAllFriendByUser(userForStorage.getId()));
+                log.info("Получен запрос на обновление пользователя " + user.getEmail());
             }
         } else {
             throw new UserException("Ошибка, пользователь не задан");
@@ -63,72 +65,37 @@ public class UserService {
     }
 
     public User getUserById(Integer id) {
-        if (userStorage.getUsers().containsKey(id) && id >= 0) {
-            log.info("Получен запрос на получение информации о пользователе с ID = " + id);
-            return userStorage.getUserById(id);
-        } else {
-            log.warn("Пользователь c ID: " + id + " не найден");
-            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
-        }
+        log.info("Получен запрос на получение информации о пользователе с ID = " + id);
+        User user = userStorage.getUserById(id);
+        user.setFriends(friendStorage.getAllFriendByUser(user.getId()));
+        return user;
     }
 
     public void addFriendToUser(Integer id, Integer friendId) {
-        if (!Objects.equals(id, friendId)) {
-            if (id >= 0 && userStorage.getUsers().containsKey(id)) {
-                if (friendId >= 0 && userStorage.getUsers().containsKey(friendId)) {
-                    userStorage.getUsers().get(id).addFriendId(friendId);
-                    userStorage.getUsers().get(friendId).addFriendId(id);
-                    log.info("Получен запрос на добавление в друзья пользователю с ID = " + id
-                            + " от пользователя с ID = " + friendId);
-                } else {
-                    log.warn("Пользователь c ID: " + friendId + " не найден");
-                    throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
-                }
-            } else {
-                log.warn("Пользователь c ID: " + id + " не найден");
-                throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
-            }
-        } else {
-            throw new ValidationException("Пользователь не может добавить сам себя в друзья");
-        }
+        log.info("Получен запрос на добавление в друзья пользователю с ID = " + id
+                + " от пользователя с ID = " + friendId);
+        friendStorage.addFriend(id, friendId);
     }
 
-    public Collection<User> findAllFriendsToUser(@PathVariable Integer id) {
-        final Collection<User> allFriends = new ArrayList<>();
-        if (id >= 0 && userStorage.getUsers().containsKey(id)) {
-            final User user = userStorage.getUsers().get(id);
-            for (Integer idFriend : user.getFriendIds()) {
-                allFriends.add(userStorage.getUsers().get(idFriend));
-            }
-            log.info("Получен запрос на получение списка всех друзей пользователя с ID = " + id);
-        } else {
-            throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
-        }
-        return allFriends;
+    public Collection<User> findAllFriendsToUser(Integer id) {
+        log.info("Получен запрос на получение списка всех друзей пользователя с ID = " + id);
+        return userStorage.findAllFriendsToUser(id);
     }
 
-    public Collection<User> findListOfCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+    public Collection<User> findListOfCommonFriends(Integer id, Integer otherId) {
         final Collection<User> listOfCommonFriends = new ArrayList<>();
         if (!Objects.equals(id, otherId)) {
-            if (id >= 0 && userStorage.getUsers().containsKey(id)) {
-                if (otherId >= 0 && userStorage.getUsers().containsKey(otherId)) {
-                    final User user1 = userStorage.getUsers().get(id);
-                    final User user2 = userStorage.getUsers().get(otherId);
-                    for (Integer idFriend : user1.getFriendIds()) {
-                        if (user2.getFriendIds().contains(idFriend)) {
-                            listOfCommonFriends.add(userStorage.getUsers().get(idFriend));
-                        }
-                    }
-                    log.info("Получен запрос на получение списка общих друзей пользователя с ID = " + id
-                            + " c пользователем с ID = " + otherId);
-                } else {
-                    log.warn("Пользователь c ID: " + otherId + " не найден");
-                    throw new ResourceNotFoundException("Пользователь c ID: " + otherId + " не найден");
+            User user1 = userStorage.getUserById(id);
+            user1.setFriends(friendStorage.getAllFriendByUser(user1.getId()));
+            User user2 = userStorage.getUserById(otherId);
+            user2.setFriends(friendStorage.getAllFriendByUser(user2.getId()));
+            for (Integer idFriend : user1.getFriendIds()) {
+                if (user2.getFriendIds().contains(idFriend)) {
+                    listOfCommonFriends.add(userStorage.getUserById(idFriend));
                 }
-            } else {
-                log.warn("Пользователь c ID: " + id + " не найден");
-                throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
             }
+            log.info("Получен запрос на получение списка общих друзей пользователя с ID = " + id);
+
         } else {
             throw new ValidationException("Пользователь не может быть сам себе другом");
         }
@@ -137,16 +104,8 @@ public class UserService {
 
     public void deleteFriendToUser(Integer id, Integer friendId) {
         if (!Objects.equals(id, friendId)) {
-            if (id >= 0 && userStorage.getUsers().containsKey(id)) {
-                if (friendId >= 0 && userStorage.getUsers().containsKey(friendId)) {
-                    userStorage.getUsers().get(id).getFriendIds().remove(friendId);
-                    log.info("Получен запрос на удаление друга с ID = " + friendId + "у пользователя с ID = " + id);
-                } else {
-                    throw new ResourceNotFoundException("Пользователь c ID: " + friendId + " не найден");
-                }
-            } else {
-                throw new ResourceNotFoundException("Пользователь c ID: " + id + " не найден");
-            }
+            log.info("Получен запрос на удаление пользователя");
+            friendStorage.deleteFriend(id, friendId);
         } else {
             throw new ValidationException("Пользователь не может удалить себя из своего списка друзей");
         }
@@ -187,12 +146,11 @@ public class UserService {
     }
 
     private boolean userVerification(User user) {
+        Collection<User> listAllUsers = findAllUsers();
         boolean isUserVerification = true;
-        if (!userStorage.getUsers().isEmpty() && !userStorage.getEmails().isEmpty()) {
-            if (userStorage.getEmails().contains(user.getEmail())) {
-                log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирован ранее");
-                isUserVerification = false;
-            }
+        if (listAllUsers.contains(user)) {
+            log.warn("Пользователь с Email:" + user.getEmail() + " зарегистрирован ранее");
+            isUserVerification = false;
         }
         return isUserVerification;
     }
